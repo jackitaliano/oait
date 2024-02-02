@@ -1,9 +1,7 @@
 from argparse import Namespace, ArgumentParser
 import os
 
-import openai_utils
-import cli_utils
-import io_utils
+from utils import openai_utils, cli_utils, io_utils
 
 def run_thread_service(key: str, args: Namespace):
 

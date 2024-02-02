@@ -1,6 +1,6 @@
 import argparse
 import os
-from threads_service import run_thread_service, add_thread_service
+from services import threads_service
 
     
 def run(args: argparse.Namespace):
@@ -16,7 +16,7 @@ def run(args: argparse.Namespace):
     service = args.services
     
     if service == 'threads':
-        run_thread_service(key, args)
+        threads_service.run_thread_service(key, args)
 
 def main():
     parser: argparse.ArgumentParser = argparse.ArgumentParser(description="OpenAI Threads Retrieval. Read from cli args or file input. Write to stdout or file.")
@@ -25,7 +25,7 @@ def main():
 
     subparsers = parser.add_subparsers(title='Available services', dest='services')
 
-    add_thread_service(subparsers)
+    threads_service.add_thread_service(subparsers)
 
     subparsers.add_parser('test', help='Test')
     args = parser.parse_args()
