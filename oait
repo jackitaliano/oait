@@ -1,2 +1,2 @@
 #!/bin/bash
-python ~/scripts/oaithreads/oait.py "$@"
+python ~/scripts/oait/oait.py "$@"

@@ -31,10 +31,10 @@ With shell file, it's the same but can just call "oait" directly without python 
 Either call with python from cli, or follow below steps.
 
 
-Copy oaithreads/oait to ~/bin (or wherever your user bin is)
+Copy oait/oait to ~/bin (or wherever your user bin is)
 
 ```bash
-cp oaithreads/oait ~/bin/oait
+cp oait/oait ~/bin/oait
 chmod +x ~/bin/oait
 ```
 
@@ -49,4 +49,4 @@ You can either put in your OpenAI key each time with the -k flag, or add to envi
 echo 'export OPENAI_API_KEY="your_key"'
 ```
 
-For the python file, you may choose to edit where it's located, but it's defaulted to ~/scripts/oaithreads/oait.py in the shell script.
+For the python file, you may choose to edit where it's located, but it's defaulted to ~/scripts/oait/oait.py in the shell script.
