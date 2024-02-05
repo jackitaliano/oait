@@ -1,5 +1,8 @@
 import json
 import os
+import base64
+from PIL import Image
+from io import BytesIO
 
 def read_txt(file_path: str):
     with open(file_path, 'r') as file:
@@ -13,6 +16,27 @@ def read_json(file_path: str):
         data: list = json.load(file)
 
     return data
+
+
+def output_jsonl(file_path: str, data):
+    with open(file_path, 'w') as file:
+        for item in data:
+            line = json.dumps(item)
+            file.write(line + 'n')
+
+def read_jsonl(file_path: str):
+    with open(file_path, 'r') as file:
+        for line in file:
+            json_object = json.loads(line)
+
+        print("line: " + json_object)
+
+
+def display_image_from_bytes(bytes: str):
+    decoded_content = base64.b64decode(bytes)
+    image = Image.open(BytesIO(decoded_content))
+
+    image.show()
 
 
 def output_thread_to_file(file_path: str, data):

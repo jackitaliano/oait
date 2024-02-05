@@ -1,4 +1,4 @@
-from argparse import Namespace, ArgumentParser
+from argparse import Namespace
 import os
 
 from utils import openai_utils, cli_utils, io_utils
