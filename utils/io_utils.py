@@ -26,15 +26,16 @@ def output_jsonl(file_path: str, data):
 
 def read_jsonl(file_path: str):
     with open(file_path, 'r') as file:
-        for line in file:
-            json_object = json.loads(line)
+        line = file
+        json_object = json.loads(line)
 
         print("line: " + json_object)
 
 
-def display_image_from_bytes(bytes: str):
-    decoded_content = base64.b64decode(bytes)
-    image = Image.open(BytesIO(decoded_content))
+def display_image_from_bytes(file_name: str, image_bytes: str):
+    
+    image = Image.open(BytesIO(image_bytes))
+    image.save(file_name)
 
     image.show()
 
