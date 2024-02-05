@@ -109,7 +109,7 @@ def get_threads_from_list(key: str, thread_ids: list[str], minlen: int):
     cli_utils.update_progress(0, total)
     for thread_id in thread_ids:
         
-        thread = openai_utils.get_thread_messages(key, thread_id)
+        thread = openai_utils.get_thread_messages(key, thread_id, limit=100)
 
         if thread:
             threads.append(thread)

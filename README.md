@@ -11,17 +11,17 @@ With just python:
 
 ```bash
 # Read default input (input.txt), write to default output (output.txt)
-python oait.py -f -o
+python oait.py threads -f -o
 ```
 
 ```bash
 # Read input.json, write to output.json
-python oait.py -f input.json -o output.json
+python oait.py threads -f input.json -o output.json
 ```
 
 ```bash
 # Read 2 thread ids, write to standard out
-python oait.py thread_id123456789 thread_id987654321
+python oait.py threads thread_id123456789 thread_id987654321
 ```
 It will use your currently active python environment.
 
@@ -30,6 +30,10 @@ With shell file, it's the same but can just call "oait" directly without python 
 ## Shell Instructions
 Either call with python from cli, or follow below steps.
 
+Allows for calling anywhere in shell. Ex:
+```bash
+oait threads -f input.txt -o output.txt
+```
 
 Copy oait/oait to ~/bin (or wherever your user bin is)
 
