@@ -50,7 +50,7 @@ def pretty_print_thread(data: list, output=None, deli="\n"):
         output=print
         deli=""
 
-    large_break: int = 55
+    large_break: int = 70
     small_break: int = 20
 
     total_threads: int = len(data)
@@ -60,17 +60,24 @@ def pretty_print_thread(data: list, output=None, deli="\n"):
         thread_id: str = d['thread_id']
         thread: list = d['thread']
 
+        thread_progress_str = f"[{i+1}/{total_threads}]"
+        thread_id_str = f"{'Thread ID: ' + thread_id: <{large_break - len(thread_progress_str)}}"
+
         output(large_break * "-" + deli)
-        output(f"Thread ID: {thread_id} [{i + 1}/{total_threads}]"+ deli)
+        output(thread_id_str + thread_progress_str + deli)
         output(large_break * "-" + deli)
         output(deli)
 
-        for msg in thread:
+        total_messages: int = len(thread)
+        for j, msg in enumerate(thread):
             role = msg['role']
             text = msg['text']
 
+            progress_str = f"[{j+1}/{total_messages}]" 
+            role_str = f"{role.upper(): <{small_break - len(progress_str)}}" 
+
             output(small_break * "-" + deli)
-            output(f"{role.upper():^{small_break}}" + deli)
+            output(role_str + progress_str + deli)
             output(small_break * "-" + deli)
             output(text + "\n" + deli)
 

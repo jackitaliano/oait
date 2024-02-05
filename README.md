@@ -30,6 +30,10 @@ With shell file, it's the same but can just call "oait" directly without python 
 ## Shell Instructions
 Either call with python from cli, or follow below steps.
 
+Allows for calling anywhere in shell. Ex:
+```bash
+oait -f input.txt -o output.txt
+```
 
 Copy oait/oait to ~/bin (or wherever your user bin is)
 
