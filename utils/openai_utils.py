@@ -1,7 +1,7 @@
 import requests
 
-def get_thread_messages(key: str, thread_id: str) -> dict | None:
-    req_url: str = f"https://api.openai.com/v1/threads/{thread_id}/messages"
+def get_thread_messages(key: str, thread_id: str, limit: int) -> dict | None:
+    req_url: str = f"https://api.openai.com/v1/threads/{thread_id}/messages?limit={limit}"
 
     headers: dict[str, str] = {
         "Content-Type": "application/json",

@@ -50,16 +50,18 @@ def pretty_print_thread(data: list, output=None, deli="\n"):
         output=print
         deli=""
 
-    large_break = 50
-    small_break = 20
+    large_break: int = 55
+    small_break: int = 20
 
-    for d in data:
+    total_threads: int = len(data)
+
+    for i, d in enumerate(data):
 
         thread_id: str = d['thread_id']
         thread: list = d['thread']
 
         output(large_break * "-" + deli)
-        output(f"Thread ID: {thread_id}" + deli)
+        output(f"Thread ID: {thread_id} [{i + 1}/{total_threads}]"+ deli)
         output(large_break * "-" + deli)
         output(deli)
 
