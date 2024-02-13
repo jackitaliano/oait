@@ -1,5 +1,5 @@
-# OpenAI Thread Retrievel Tool
-CLI retrieve threads individually, programatically, etc.
+# OpenAI Thread/Image Retrievel Tool
+CLI retrieve threads or images (files) individually, programatically, etc.
 
 For info:
 ```bash
@@ -23,6 +23,12 @@ python oait.py threads -f input.json -o output.json
 # Read 2 thread ids, write to standard out
 python oait.py threads thread_id123456789 thread_id987654321
 ```
+
+```bash
+# retrieve image by file id, output to image.png
+python oait.py images -r file_123456789 -o "image.png"
+```
+
 It will use your currently active python environment.
 
 With shell file, it's the same but can just call "oait" directly without python and do it from anywhere.
