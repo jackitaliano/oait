@@ -19,10 +19,10 @@ def read_json(file_path: str):
 
 
 def output_jsonl(file_path: str, data):
-    with open(file_path, 'w') as file:
-        for item in data:
-            line = json.dumps(item)
-            file.write(line + 'n')
+    with open(file_path, "w") as output_file:
+        for line in data:
+            json.dump(line, output_file)
+            output_file.write("\n")
 
 def read_jsonl(file_path: str):
     with open(file_path, 'r') as file:
@@ -53,8 +53,11 @@ def output_image_to_file(file_path: str, data):
     if file_type == "png":
         display_image_from_bytes(file_path, data)
 
+    elif file_type == "jsonl":
+        output_jsonl(file_path, data)
+
     else:
-        print(f"ERROR (fatal): Must pass json or txt output file. Got: {file_type}")
+        print(f"ERROR (fatal): Must pass png or jsonl output file. Got: {file_type}")
         exit(1)
 
 
