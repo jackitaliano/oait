@@ -32,12 +32,30 @@ def read_jsonl(file_path: str):
         print("line: " + json_object)
 
 
-def display_image_from_bytes(file_name: str, image_bytes: str):
-    
+def save_image(file_name: str, image_bytes: str):
     image = Image.open(BytesIO(image_bytes))
+
     image.save(file_name)
 
-    image.show()
+    return image
+
+
+def display_image_from_bytes(file_name: str, image_bytes: str):
+    
+    image = save_image(file_name, image_bytes)
+
+    image.show(title=file_name)
+
+
+def output_image_to_file(file_path: str, data):
+    file_type: str = os.path.splitext(file_path)[1][1:]
+
+    if file_type == "png":
+        display_image_from_bytes(file_path, data)
+
+    else:
+        print(f"ERROR (fatal): Must pass json or txt output file. Got: {file_type}")
+        exit(1)
 
 
 def output_thread_to_file(file_path: str, data):

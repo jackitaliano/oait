@@ -1,4 +1,5 @@
 import requests
+import json
 
 def get_file_by_id(key: str, file_id: str) -> dict | None:
     req_url: str = f"https://api.openai.com/v1/files/{file_id}/content"
@@ -11,13 +12,14 @@ def get_file_by_id(key: str, file_id: str) -> dict | None:
     res = response.content
 
     if response.status_code != 200:
+        res = response.json()
         error_message: str = ""
         if res['error']['type'] == 'invalid_request_error':
             error_message = res['error']['message']
         else:
             error_message = str(res)
 
-        print("ERROR: " + error_message)
+        print("ERROR (fatal): " + error_message)
         return None
 
     return res
@@ -61,6 +63,9 @@ def get_session_threads(session_id: str, limit: int):
     response: requests.Response = requests.get(url=req_url, headers=headers)
     res = response.json()
 
+    print(response)
+    print(res)
+
     if response.status_code != 200:
         error_message: str = ""
         if res['error']['type'] == 'invalid_request_error' and res['error']['message'][0:25] == "":
@@ -72,3 +77,44 @@ def get_session_threads(session_id: str, limit: int):
         return None
 
     return res
+
+
+def generate_image(key: str, prompt: str):
+    req_url: str = "https://api.openai.com/v1/images/generations"
+
+    headers: dict[str,str] = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {key}"
+    }
+
+    payload: dict = {
+        "model": "dall-e-3",
+        "prompt": prompt,
+        "n": 1,
+        "size": "1024x1024"
+    }
+
+    json_payload = json.dumps(payload)
+
+    response: requests.Response = requests.post(url=req_url, headers=headers, data=json_payload)
+    res = response.json()
+
+    if response.status_code != 200:
+        error_message: str = ""
+        if res['error']['type'] == 'invalid_request_error' and res['error']['message'][0:25] == "":
+            error_message = res['error']['message']
+        else:
+            error_message = str(res)
+
+        print("ERROR: " + error_message)
+        return None
+
+    return res
+
+
+    
+
+
+
+
+
