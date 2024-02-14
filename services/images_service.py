@@ -1,34 +1,36 @@
 from argparse import Namespace
-import base64
 
-from utils import openai_utils, io_utils, request_utils, cli_utils
-
+from utils import openai_utils, io_utils, request_utils, cli_utils 
+from utils.logger import logger, Timestamp
+from datetime import datetime
 
 def run_image_service(key: str, args: Namespace):
 
-    image_file_id: str = args.file_id
+    logger.debug(f"Received arguments: {args}", run_image_service)
+
+    image_file_id: str = args.fileid
     output: str = args.output
     prompt: str = args.prompt
     image_url: str = args.url
 
-    if image_file_id:
-        get_image_by_file_id(key, image_file_id, output)
+    if image_file_id or image_url:
+        logger.info(f"Running image retrieval...")
 
-    elif image_url:
-        get_image_by_url(image_url, output)
+        handle_image_retrieval(key, args)
 
     elif prompt:
-         generate_image(key, prompt, output)
+        logger.info(f"Running image generation...")
+        handle_image_generation(key, args)
 
     else:
-        print("ERROR (fatal): Must choose method of image service") 
+        logger.fatal("Must choose method of image service (retrieval or generation).", method=run_image_service) 
         exit(1)
 
 
 def add_image_service(subparsers):
     images_parser = subparsers.add_parser('images', help='Options for images service. See `oait images --help`')
 
-    images_parser.add_argument('--file_id', '-f', type=str, help="Retrive image by file id.")
+    images_parser.add_argument('--fileid', '-f', type=str, help="Retrive image by file id.")
     images_parser.add_argument('--prompt', '-p', type=str, help="Generate image by prompt.")
     images_parser.add_argument('--url', '-u', type=process_url, help="Retrieve image by url.")
     images_parser.add_argument('--output', '-o', nargs='?', type=str, help="Output file ('png', 'json', or 'jsonl'). 'png' for retrieving image by file id or url. Use either for generating image. (Pass only -o for default: [file-id].png / [image.json])", const="default", default=None)
@@ -38,93 +40,162 @@ def process_url(arg):
     return arg.replace('\\', '')
 
 
-def get_image_by_file_id(key: str, image_file_id: str, image_file_name: str) -> str:
+def handle_image_retrieval(key, args):
+    image_url: str = args.url
+    image_file_id: str = args.fileid
+    output: str = args.output
+
+    image_data = None
+
+    if image_file_id:
+        logger.info(f"Retrieving image by file_id ('{image_file_id}')...")
+        image_data = get_image_by_file_id(key, image_file_id)
+
+    elif image_url:
+        logger.info(f"Retrieving image by url ('{image_url}')...")
+        image_data = get_image_by_url(image_url)
+
+    else:
+        logger.fatal("Image retrieval method unknown. Must supply file-id or url.", method=handle_image_retrieval)
+        exit(1)
+
+
+    if image_data is None:
+        logger.fatal("Image data not found.")
+        exit(1)
+
+    logger.debug("Outputing image data.", method=handle_image_retrieval)
+    handle_image_output(image_data, output)
+
+
+def handle_image_generation(key, args):
+    image_prompt: str = args.prompt
+    output: str = args.output
+
+    if image_prompt:
+        logger.info(f"Generating image with prompt: '{image_prompt}'")
+        image_data = generate_image_from_prompt(key, image_prompt)
+
+    else:
+        logger.fatal("No prompt received for image generation.", method=handle_image_generation)
+        exit(1)
+
+    logger.debug("Outputing image data.", method=handle_image_generation)
+    handle_image_output(image_data, output)
+
+
+def handle_image_output(image_data, output_fp):
+    image_type = get_instance_type_name(image_data)
+
+    if image_type == "dict":
+        logger.debug(f"Outputing image of type dict.", method=handle_image_output)
+        handle_image_dict_output(image_data, output_fp)
+        return
+
+    elif image_type == "bytes":
+        logger.debug(f"Outputing image of type bytes.", method=handle_image_output)
+        handle_image_bytes_output(image_data, output_fp)
+        return
+
+    elif image_type == "list":
+        logger.debug(f"Outputing image of type list.", method=handle_image_output)
+        for item in image_data:
+            handle_image_output(item, output_fp)
+
+        return
+
+    else:
+        logger.fatal(f"Image type '{image_type}' not supported.", method=handle_image_output)
+        exit(1)
+
+
+def handle_image_bytes_output(image_bytes, output_fp):
+    if output_fp is None:
+        date_time = logger._format_date_time(Timestamp.DATE_AND_TIME)
+        output_fp = f"image-{date_time}.png"
+        logger.warning(f"No image output file provided. Defaulting to: {output_fp}.", method=handle_image_bytes_output)
+
+    file_type: str = cli_utils.get_file_type(output_fp)
+
+    if file_type == "png":
+        logger.info(f"Outputing image bytes to fp: '{output_fp}'.")
+        io_utils.output_image_to_file(output_fp, image_bytes)
+        return
+
+    elif file_type == 'jsonl':
+        logger.info(f"Outputing image jsonl to fp: '{output_fp}'.")
+        io_utils.output_image_to_jsonl(output_fp, image_bytes)
+        return
+
+    else:
+        logger.fatal(f"Images cannot be written to files of type: '{file_type}'. Accepted file types: ('png', 'jsonl')", method=handle_image_bytes_output)
+        exit(1)
+
+
+def handle_image_dict_output(image_dict, output_fp):
+    if output_fp is None:
+        date_time = logger._format_date_time(Timestamp.DATE_AND_TIME)
+        output_fp = f"image-{date_time}.json"
+        logger.warning(f"No image output file provided. Defaulting to: {output_fp}", method=handle_image_dict_output)
+
+    file_type: str = cli_utils.get_file_type(output_fp)
+
+    if file_type == "json":
+        logger.info(f"Outputing image json to fp: '{output_fp}'")
+        io_utils.output_to_json(output_fp, image_dict)
+        return
+
+    else:
+        logger.fatal(f"Dicts cannot be written to files of type: '{file_type}'. Accepted file types: ('json')", method=handle_image_dict_output)
+        exit(1)
+
+
+def get_instance_type_name(item):
+    item_class_type: type = type(item)
+
+    item_type: str = item_class_type.__name__
+
+    return item_type
+
+
+def get_image_by_file_id(key: str, image_file_id: str):
+    logger.info("Fetching image from OpenAI by file_id...")
 
     file_object: dict = openai_utils.get_file_by_id(key, image_file_id)
 
     if file_object is None:
+        logger.fatal("No image returned by file id.", method=get_image_by_file_id)
         exit(1)
 
-    else:
-
-        if image_file_name is None:
-            image_file_name = image_file_id + ".png"
-        elif image_file_name[-4:] != ".png":
-            image_file_name = image_file_id + ".png"
-            print(f"ERROR: File name not ending in '.png'. Using default ({image_file_name})")
-
-        io_utils.output_image_to_file(image_file_name, file_object)
+    logger.info("File object returned from api by file id.", method=get_image_by_file_id)
+    return file_object
 
 
-def get_image_by_url(image_url: str, image_file_name: str) -> None:
+def get_image_by_url(image_url: str):
+    logger.info("Fetching image from url...")
 
     image_data = request_utils.get_image_from_url(image_url)
 
     if not image_data:
-        print(f"ERROR: no data return from api.")
-        return
+        logger.fatal("No data return from url.", method=get_image_by_url)
+        exit(1)
 
-    if image_file_name is None:
-        image_file_name = "image.png"
-
-    file_type: str = cli_utils.get_file_type(image_file_name)
-    if file_type != "png" and file_type != "jsonl":
-        image_file_name = "image.png"
-        print(f"ERROR: Only supporting output to '.png' or '.jsonl' files. Got: {file_type}. Defaulting to: {image_file_name}")
+    logger.info("Image data returned from url.", method=get_image_by_url)
+    return image_data
 
 
-    if file_type == "jsonl":
-        image_base64 = base64.b64encode(image_data).decode('utf-8')
-        image_data = [{'url': image_url, 'image_base64': image_base64 }]
-
-    io_utils.output_image_to_file(image_file_name, image_data)
-
-
-def generate_image(key: str, prompt: str, image_file_name: str):
+def generate_image_from_prompt(key: str, prompt: str):
+    logger.info("Generating image...")
     image_res = openai_utils.generate_image(key, prompt)
 
-    if image_res:
-        print(f"ERROR: no data return from api.")
-        return
+    if not image_res:
+        logger.fatal("No content returned from api.", method=generate_image_from_prompt)
+        exit(1)
 
-    data = image_res.get('data')
+    image_data = image_res.get('data')
+    if not image_data:
+        logger.fatal("No data returned from api", method=generate_image_from_prompt)
 
-    images = data
-
-    if image_file_name is None:
-        image_file_name = "image.json"
-
-    if image_res:
-        print(f"Image generated. Saving to file {image_file_name} ...")
-
-    file_type: str = cli_utils.get_file_type(image_file_name)
-    if file_type != "png" and file_type != "json" and file_type != "jsonl":
-        image_file_name = "image.json"
-        (f"ERROR: Only supporting output to '.png' and '.json' files. Got: {file_type}. Defaulting to: {image_file_name}")
-
-    if file_type == "png":
-        urls: list[str] = [img.get('url') for img in images]
-
-        image_data = [request_utils.get_image_from_url(url) for url in urls ]
-
-        if image_data:
-            io_utils.output_image_to_file(image_file_name, image_data)
-
-    if file_type == "jsonl":
-        urls: list[str] = [img.get('url') for img in images]
-
-        image_data = [{ 'url': url, 'image_base64': request_utils.get_image_from_url(url).decode('base64') } for url in urls ]
-        print(image_data)
-
-        if image_data:
-            io_utils.output_image_to_file(image_file_name, image_data)
-
-
-    elif file_type == "json":
-        io_utils.output_to_json(image_file_name, images)
-
-    else:
-        image_file_name = "image.json"
-        (f"ERROR: Only supporting output to '.png' and '.json' files. Got: {file_type}. Defaulting to: {image_file_name}")
-
-
+    logger.info(f"Image data returned from image generation.")
+    logger.debug(f"Image data: {image_data}")
+    return image_data

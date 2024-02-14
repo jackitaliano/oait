@@ -61,6 +61,18 @@ def output_image_to_file(file_path: str, data):
         exit(1)
 
 
+def bytes_to_base64(byte_data):
+    b64_data = base64.b64encode(byte_data).decode('utf-8')
+
+    return b64_data
+
+
+def output_image_to_jsonl(file_path: str, data):
+    b64_images = [ {'image_base64': bytes_to_base64(item)} for item in data ]
+
+    output_jsonl(file_path, b64_images)
+
+
 def output_thread_to_file(file_path: str, data):
     file_type: str = os.path.splitext(file_path)[1][1:]
 
