@@ -24,6 +24,63 @@ class Timestamp(Enum):
     DATE_AND_TIME = f"{DATE}_{TIME}"
     NONE = "NONE"
 
+def setup_logs(args) -> TextIO | None:
+    if logger._IS_SETUP:
+        print("LOGGER WARNING: logger has already been setup, unable to change during runtime.")
+
+    logger._IS_SETUP = True
+
+    verbose: bool = args.verbose
+    debug: bool = args.debug
+    silent: bool = args.silent
+    force_silent: bool = args.Silent
+    logs: bool = args.logs
+
+    file_output: bool = False
+    logs_file = None
+
+    if logs:
+        logger.FILE_TIMESTAMP = Timestamp.DATE_AND_TIME
+        logger.FILE_LOG_LEVEL = LogLevel.DEBUG
+        logs_fp = f"logs_oait_{logger._format_date_time(Timestamp.DATE_AND_TIME)}.txt"
+        logs_file = open(logs_fp, 'w')
+        logger.OUTPUT_STREAM = logs_file
+        file_output = True
+
+    if verbose:
+        if debug or silent or force_silent:
+            print("FATAL: cannot have more than one log level enable.")
+            exit(1)
+
+        logger.STD_LOG_LEVEL = LogLevel.INFO
+    if debug:
+        if verbose or silent or force_silent:
+            print("FATAL: cannot have more than one log level enable.")
+            exit(1)
+
+        logger.TIMESTAMP = Timestamp.TIME
+        logger.STD_LOG_LEVEL = LogLevel.DEBUG
+
+    if silent:
+        if verbose or debug or force_silent:
+            print("FATAL: cannot have more than one log level enable.")
+            exit(1)
+
+        logger.STD_LOG_LEVEL = LogLevel.FATAL
+
+    if force_silent:
+        if verbose or debug or silent:
+            print("FATAL: cannot have more than one log level enable.")
+            exit(1)
+
+        logger.STD_LOG_LEVEL = LogLevel.NONE
+
+    if file_output:
+        logger.OUTPUT_TYPE = OutputType.STD_AND_FILE
+    else:
+        logger.OUTPUT_TYPE = OutputType.STD
+
+    return logs_file
 
 class logger:
     STD_LOG_LEVEL: LogLevel = LogLevel.WARNING
@@ -32,60 +89,7 @@ class logger:
     OUTPUT_STREAM: TextIO | None = None
     TIMESTAMP: Timestamp = Timestamp.NONE
     FILE_TIMESTAMP: Timestamp = Timestamp.DATE_AND_TIME
-
-    @classmethod
-    def setup_logs(cls, args) -> TextIO | None:
-        verbose: bool = args.verbose
-        debug: bool = args.debug
-        silent: bool = args.silent
-        force_silent: bool = args.Silent
-        logs: bool = args.logs
-
-        file_output: bool = False
-        logs_file = None
-
-        if logs:
-            cls.FILE_TIMESTAMP = Timestamp.DATE_AND_TIME
-            cls.FILE_LOG_LEVEL = LogLevel.DEBUG
-            logs_fp = f"logs_oait_{logger._format_date_time(Timestamp.DATE_AND_TIME)}.txt"
-            logs_file = open(logs_fp, 'w')
-            cls.OUTPUT_STREAM = logs_file
-            file_output = True
-
-        if verbose:
-            if debug or silent or force_silent:
-                print("FATAL: cannot have more than one log level enable.")
-                exit(1)
-
-            cls.STD_LOG_LEVEL = LogLevel.INFO
-        if debug:
-            if verbose or silent or force_silent:
-                print("FATAL: cannot have more than one log level enable.")
-                exit(1)
-
-            cls.TIMESTAMP = Timestamp.TIME
-            cls.STD_LOG_LEVEL = LogLevel.DEBUG
-
-        if silent:
-            if verbose or debug or force_silent:
-                print("FATAL: cannot have more than one log level enable.")
-                exit(1)
-
-            cls.STD_LOG_LEVEL = LogLevel.FATAL
-
-        if force_silent:
-            if verbose or debug or silent:
-                print("FATAL: cannot have more than one log level enable.")
-                exit(1)
-
-            cls.STD_LOG_LEVEL = LogLevel.NONE
-
-        if file_output:
-            cls.OUTPUT_TYPE = OutputType.STD_AND_FILE
-        else:
-            cls.OUTPUT_TYPE = OutputType.STD
-
-        return logs_file
+    _IS_SETUP: bool = False
 
     @classmethod
     def debug(cls, message: str, method: Callable | None = None) -> None:

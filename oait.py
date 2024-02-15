@@ -1,7 +1,7 @@
 import argparse
 import os
 from typing import TextIO
-from utils.logger import logger
+from utils.logger import logger, setup_logs
 from services import threads_service, images_service
     
 
@@ -42,7 +42,7 @@ def main():
 
     args = parser.parse_args()
 
-    logs_file: TextIO | None = logger.setup_logs(args)
+    logs_file: TextIO | None = setup_logs(args)
 
     try:
         if not args.services:
