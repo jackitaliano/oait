@@ -163,8 +163,9 @@ class logger:
         log_type_fmt = logger._format_log_type(log_type)
 
         timestamp_pad = 0 if timestamp == Timestamp.NONE else 25
+        method_pad = 0 if not method_fmt else 30
 
-        output_fmt = f"{date_time_fmt: <{timestamp_pad}}{method_fmt: <30}{log_type_fmt: <10}{message}"
+        output_fmt = f"{date_time_fmt: <{timestamp_pad}}{method_fmt: <{method_pad}}{log_type_fmt: <10}{message}"
         return output_fmt 
 
     @staticmethod

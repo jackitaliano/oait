@@ -28,7 +28,7 @@ def run_image_service(key: str, args: Namespace):
 
 
 def add_image_service(subparsers):
-    images_parser = subparsers.add_parser('images', help='Options for images service. See `oait images --help`')
+    images_parser = subparsers.add_parser('images', help='Options for Images service. See `oait images --help`')
 
     images_parser.add_argument('--fileid', '-f', type=str, help="Retrive image by file id.")
     images_parser.add_argument('--prompt', '-p', type=str, help="Generate image by prompt.")

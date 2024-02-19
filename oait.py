@@ -2,7 +2,7 @@ import argparse
 import os
 from typing import TextIO
 from utils.logger import logger, setup_logs
-from services import threads_service, images_service
+from services import threads_service, images_service, assitants_service
     
 
 def run(args: argparse.Namespace):
@@ -16,6 +16,8 @@ def run(args: argparse.Namespace):
             exit(1)
 
     service = args.services
+    logger.debug(f"Service selected: '{service}'", method=run)
+    logger.debug(f"Args: '{args}'", method=run)
     
     if service == 'threads':
         threads_service.run_thread_service(key, args)
@@ -23,10 +25,20 @@ def run(args: argparse.Namespace):
     elif service == 'images':
         images_service.run_image_service(key, args)
 
+    elif service == 'asst':
+        assitants_service.run_assistants_service(key, args)
+
 
 def main():
 
-    parser: argparse.ArgumentParser = argparse.ArgumentParser(description="OpenAI Threads Retrieval. Read from cli args or file input. Write to stdout or file.")
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(prog="oait")
+    parser.description="""OpenAI Tools.\n
+    Tools for interacting with the OpenAI API via:\n
+      - cli (`oait ...`)\n
+      - python cli (`python oait.py ...`)\n
+      - copy/pasting source into your own project\n
+    """
+    parser.usage=f"{parser.prog} [-v/-d/-s/-S/-l] [-k] <threads, images, asst> ..."
 
     parser.add_argument('--key', '-k', type=str, help="Provide OpenAI key. Defaults to process.env.OPENAI_API_KEY")
     parser.add_argument('--verbose', '-v', action="store_true", help="Enable verbosity of logging (info level)")
@@ -39,6 +51,7 @@ def main():
 
     threads_service.add_thread_service(subparsers)
     images_service.add_image_service(subparsers)
+    assitants_service.add_assistant_service(subparsers)
 
     args = parser.parse_args()
 
@@ -52,6 +65,7 @@ def main():
 
     except Exception as e:
         logger.fatal(str(e), method=main)
+        raise e
         
     finally:
         if logs_file and not logs_file.closed:
