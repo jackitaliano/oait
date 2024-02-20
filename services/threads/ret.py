@@ -6,6 +6,21 @@ from utils.logger import logger
 
 from . import openai_utils
 
+
+def add_service(parser):
+    threads_parser = parser.add_parser('ret', help='Options for Threads Retrieval service. See `oait thread ret --help`')
+
+    threads_parser.description = "OpenAI Thread Retrieval Tools."
+    threads_parser.usage = "oait thread ret ( <thread_id> [<thread_id> ...] | -f FILE | -s SESSION ) [-o OUTPUT] [-l LIMIT] [-ml MINLEN]"
+
+    threads_parser.add_argument('thread_ids', nargs='*', type=str, help="Read messages from provided list of thread_ids (space separated)")
+    threads_parser.add_argument('--file', '-f', nargs='?', type=str, help="Read thread_ids from file path. (json or newline separated txt)\n(Pass only -f for default: input.txt)", const="input.txt", default=None)
+    threads_parser.add_argument('--session', '-s', type=str, help="Get thread messages from session id (Navigate to https://platform.openai.com/assistants. Copy Authorization header 'sess-')")
+    threads_parser.add_argument('--output', '-o', nargs='?', type=str, help="Output file (json). (Pass only -o for default: output.json)", const="output.txt", default=None)
+    threads_parser.add_argument('--limit', '-l', type=int, help="Limit for number of session threads")
+    threads_parser.add_argument('--minlen', '-ml', type=int, help="Minimum length of threads to include in output.", default=1)
+
+
 def run_service(key: str, args: Namespace):
 
     thread_ids: list[str] = args.thread_ids
@@ -43,20 +58,6 @@ def run_service(key: str, args: Namespace):
     else:
         logger.info("Outputing threads to std...")
         io_utils.pretty_print_thread(parsed_threads)
-
-
-def add_service(parser):
-    threads_parser = parser.add_parser('ret', help='Options for Threads Retrieval service. See `oait thread ret --help`')
-
-    threads_parser.description = "OpenAI Thread Retrieval Tools."
-    threads_parser.usage = "oait thread ret ( <thread_id> [<thread_id> ...] | -f FILE | -s SESSION ) [-o OUTPUT] [-l LIMIT] [-ml MINLEN]"
-
-    threads_parser.add_argument('thread_ids', nargs='*', type=str, help="Read messages from provided list of thread_ids (space separated)")
-    threads_parser.add_argument('--file', '-f', nargs='?', type=str, help="Read thread_ids from file path. (json or newline separated txt)\n(Pass only -f for default: input.txt)", const="input.txt", default=None)
-    threads_parser.add_argument('--session', '-s', type=str, help="Get thread messages from session id (Navigate to https://platform.openai.com/assistants. Copy Authorization header 'sess-')")
-    threads_parser.add_argument('--output', '-o', nargs='?', type=str, help="Output file (json). (Pass only -o for default: output.json)", const="output.txt", default=None)
-    threads_parser.add_argument('--limit', '-l', type=int, help="Limit for number of session threads")
-    threads_parser.add_argument('--minlen', '-ml', type=int, help="Minimum length of threads to include in output.", default=1)
 
 
 def parse_thread_data(thread_data: list) -> list[dict]:
