@@ -126,3 +126,31 @@ def add_message_to_thread(key: str, thread_id: str, message: dict):
 
     logger.debug(f"OpenAI response: '{res}'", method=add_message_to_thread)
     return res
+
+
+def delete_thread(key: str, thread_id: str):
+    logger.debug(f"Deleting OpenAI thread_id: '{thread_id}'")
+
+    req_url: str = f"https://api.openai.com/v1/threads/{thread_id}"
+
+    headers: dict[str, str] = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {key}",
+        "OpenAI-Beta": "assistants=v1"
+    }
+
+    response: requests.Response = requests.delete(url=req_url, headers=headers)
+    res = response.json()
+
+    if response.status_code != 200:
+        error_message: str = ""
+        if res['error']['type'] == 'invalid_request_error' and res['error']['message'][0:25] == "":
+            error_message = res['error']['message']
+        else:
+            error_message = str(res)
+
+        logger.error(error_message)
+        return None
+
+    logger.debug(f"OpenAI response: '{res}'", method=delete_thread)
+    return res

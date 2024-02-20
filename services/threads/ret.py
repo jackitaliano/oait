@@ -89,16 +89,14 @@ def parse_thread_data(thread_data: list) -> list[dict]:
     return messages
 
 
-def parse_thread(thread_messages: dict, minlen) -> dict:
-    logger.debug(f"Parsing thread messages. with minlen: '{minlen}'", method=parse_thread)
+def parse_thread(thread_messages: dict) -> dict:
+    logger.debug(f"Parsing thread messages.", method=parse_thread)
     thread_id: str = thread_messages['thread_id']
     try: 
         thread_data: list[dict] = thread_messages['data']
 
         parsed_thread: list[dict[str, str]] = parse_thread_data(thread_data)
 
-        if len(parsed_thread) < minlen:
-            return None
         # they're given in reverse order by openai
         parsed_thread = parsed_thread[::-1]
 
@@ -132,7 +130,9 @@ def get_threads_from_list(key: str, thread_ids: list[str], minlen: int):
         thread = openai_utils.get_thread_messages(key, thread_id, limit=100)
 
         if thread:
-            threads.append(thread)
+            thread_data = thread.get('data')
+            if not thread_data is None and len(thread_data) >= minlen:
+                threads.append(thread)
 
         progress += 1
         cli_utils.update_progress(progress, total)
@@ -142,7 +142,7 @@ def get_threads_from_list(key: str, thread_ids: list[str], minlen: int):
 
     parsed_threads: list[dict] = []
     for thread in threads:
-        parsed_thread = parse_thread(thread, minlen)
+        parsed_thread = parse_thread(thread)
         if parsed_thread:
             parsed_threads.append(parsed_thread)
 

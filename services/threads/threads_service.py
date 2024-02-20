@@ -2,6 +2,7 @@ from argparse import Namespace
 
 from utils.logger import logger
 from services.threads import ret
+from services.threads import delete
 
 
 def add_service(parser):
@@ -11,6 +12,7 @@ def add_service(parser):
 
     threads_subparsers = threads_parser.add_subparsers(title='Available Threads services', dest='threads_service')
     ret.add_service(threads_subparsers)
+    delete.add_service(threads_subparsers)
 
 
 def run_service(key: str, args: Namespace):
@@ -21,6 +23,9 @@ def run_service(key: str, args: Namespace):
 
     if service == 'ret':
         ret.run_service(key, args)
+
+    elif service == 'del':
+        delete.run_service(key, args)
 
     else:
         logger.fatal("Must choose threads service (`oait thread ret`).", method=run_service) 
