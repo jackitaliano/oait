@@ -17,7 +17,7 @@ def run_service(key: str, args: Namespace):
 
     logger.debug(f"Received arguments: {args}", method=run_service)
 
-    service = args.asst_service
+    service = args.threads_service
 
     if service == 'ret':
         ret.run_service(key, args)

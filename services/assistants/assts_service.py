@@ -9,7 +9,7 @@ def add_service(parser):
     asst_parser.description = "OpenAI Tools for Assistants"
     asst_parser.usage="oait assts <create, mod, run> ..."
 
-    asst_subparsers = asst_parser.add_subparsers(title='Available assistant services', dest='asst_service')
+    asst_subparsers = asst_parser.add_subparsers(title='Available assistant services', dest='assts_service')
     create.add_service(asst_subparsers)
     modify.add_service(asst_subparsers)
     run.add_service(asst_subparsers)
@@ -19,7 +19,7 @@ def run_service(key: str, args: Namespace):
 
     logger.debug(f"Received arguments: {args}", method=run_service)
 
-    service = args.asst_service
+    service = args.assts_service
 
     if service == 'create':
         create.run_service(key, args)

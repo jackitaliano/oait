@@ -1,5 +1,7 @@
-from utils import openai_utils, cli_utils, io_utils, request_utils
+from utils import cli_utils, io_utils
 from utils.logger import logger, Timestamp
+
+from . import openai_utils, request_utils
 
 
 def add_service(parser):
@@ -19,7 +21,7 @@ def process_url(arg):
 
 def run_service(key, args):
     image_url: str = args.url
-    image_file_id: str = args.fileid
+    image_file_id: str = args.file
     output: str = args.output
 
     image_data = None

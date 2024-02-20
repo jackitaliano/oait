@@ -1,5 +1,7 @@
-from utils import openai_utils
 from utils.logger import logger
+
+from . import openai_utils
+
 
 def add_service(parser):
     modify_parser = parser.add_parser('modify', help="Modify an assistant. See `oait asst modify --help`")

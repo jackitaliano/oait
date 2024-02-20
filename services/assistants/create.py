@@ -1,5 +1,6 @@
-from utils import openai_utils
 from utils.logger import logger
+
+from . import openai_utils
 
 
 def add_service(parser):

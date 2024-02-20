@@ -9,7 +9,7 @@ def add_service(parser):
     image_parser.description = "OpenAI Tools for Images"
     image_parser.usage="oait images <gen, ret> ..."
 
-    image_subparsers = image_parser.add_subparsers(title='Available Images services', dest='image_service')
+    image_subparsers = image_parser.add_subparsers(title='Available Images services', dest='images_service')
     gen.add_service(image_subparsers)
     ret.add_service(image_subparsers)
 
@@ -18,7 +18,7 @@ def run_service(key: str, args: Namespace):
 
     logger.debug(f"Received arguments: {args}", method=run_service)
 
-    service = args.image_service
+    service = args.images_service
 
     if service == 'gen':
         gen.run_service(key, args)

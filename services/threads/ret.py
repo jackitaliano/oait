@@ -1,8 +1,10 @@
 from argparse import Namespace
 import os
 
-from utils import openai_utils, cli_utils, io_utils
+from utils import cli_utils, io_utils
 from utils.logger import logger
+
+from . import openai_utils
 
 def run_service(key: str, args: Namespace):
 
