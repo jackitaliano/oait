@@ -1,8 +1,11 @@
 import argparse
 import os
 from typing import TextIO
+
 from utils.logger import logger, setup_logs
-from services import threads_service, images_service, assitants_service
+from services.threads import threads_service
+from services.images import images_service
+from services.assistants import assts_service
     
 
 def run(args: argparse.Namespace):
@@ -20,13 +23,13 @@ def run(args: argparse.Namespace):
     logger.debug(f"Args: '{args}'", method=run)
     
     if service == 'threads':
-        threads_service.run_thread_service(key, args)
+        threads_service.run_service(key, args)
 
     elif service == 'images':
-        images_service.run_image_service(key, args)
+        images_service.run_service(key, args)
 
-    elif service == 'asst':
-        assitants_service.run_assistants_service(key, args)
+    elif service == 'assts':
+        assts_service.run_service(key, args)
 
 
 def main():
@@ -49,9 +52,9 @@ def main():
 
     subparsers = parser.add_subparsers(title='Available services', dest='services')
 
-    threads_service.add_thread_service(subparsers)
-    images_service.add_image_service(subparsers)
-    assitants_service.add_assistant_service(subparsers)
+    threads_service.add_service(subparsers)
+    images_service.add_service(subparsers)
+    assts_service.add_service(subparsers)
 
     args = parser.parse_args()
 
@@ -59,7 +62,7 @@ def main():
 
     try:
         if not args.services:
-            logger.fatal("Must enter a service (e.g. 'threads'). See oait --help")
+            logger.fatal("Must enter a service (`oait (threads | images | assts) ...`). See `oait --help`")
 
         run(args)
 
