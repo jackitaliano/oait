@@ -8,10 +8,10 @@ from . import openai_utils
 
 
 def add_service(parser):
-    threads_parser = parser.add_parser('ret', help='Options for Threads Retrieval service. See `oait thread ret --help`')
+    threads_parser = parser.add_parser('ret', help='Options for Threads Retrieval service. See `oait threads ret --help`')
 
     threads_parser.description = "OpenAI Thread Retrieval Tools."
-    threads_parser.usage = "oait thread ret ( <thread_id> [<thread_id> ...] | -f FILE | -s SESSION ) [-o OUTPUT] [-l LIMIT] [-ml MINLEN]"
+    threads_parser.usage = "oait threads ret ( <thread_id> [<thread_id> ...] | -f FILE | -s SESSION ) [-o OUTPUT] [-l LIMIT] [-ml MINLEN]"
 
     threads_parser.add_argument('thread_ids', nargs='*', type=str, help="Read messages from provided list of thread_ids (space separated)")
     threads_parser.add_argument('--file', '-f', nargs='?', type=str, help="Read thread_ids from file path. (json or newline separated txt)\n(Pass only -f for default: input.txt)", const="input.txt", default=None)
