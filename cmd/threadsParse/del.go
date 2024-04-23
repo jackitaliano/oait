@@ -38,7 +38,7 @@ func (d *DelCommand) Happened() bool {
 	return d.command.Happened()
 }
 
-func (d *DelCommand) Run() error {
+func (d *DelCommand) Run(key string) error {
 	args := d.command.GetArgs()
 	threadsParsed := args[1].GetParsed()
 	inputParsed := args[2].GetParsed()

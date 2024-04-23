@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/akamensky/argparse"
+
 	"github.com/jackitaliano/oait-go/cmd/threadsParse"
 	"github.com/jackitaliano/oait-go/cmd/imagesParse"
-
-	"github.com/akamensky/argparse"
 )
 
 func main() {
@@ -15,6 +15,11 @@ func main() {
 	const progDesc = "OpenAI Tools"
 
 	parser := argparse.NewParser(progName, progDesc)
+	keyArg := parser.String("k", "key", &argparse.Options{ 
+		Required: false, 
+		Help: "OpenAI API Key (default to env var 'OPENAI_API_KEY')",
+		Default: os.Getenv("OPENAI_API_KEY"),
+	})
 
 	threadsService := threadsParse.NewService(parser)
 	imagesService := imagesParse.NewService(parser)
@@ -25,13 +30,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	var args []*argparse.Command = parser.GetCommands()
+	var commands []*argparse.Command = parser.GetCommands()
 
-	var threadsCommand *argparse.Command = args[0]
-	var imagesCommand *argparse.Command = args[1]
+	var threadsCommand *argparse.Command = commands[0]
+	var imagesCommand *argparse.Command = commands[1]
 
 	if threadsCommand.Happened() {
-		err := threadsService.Run()
+		err := threadsService.Run(*keyArg)
 
 		if err != nil {
 			fmt.Print(err.Error())

@@ -1,6 +1,7 @@
 package threadsParse
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -40,31 +41,32 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 }
 
 func (g *GetCommand) Happened() bool {
+
 	return g.command.Happened()
 }
 
-func (g *GetCommand) Run() error {
+func (g *GetCommand) Run(key string) error {
 	args := g.command.GetArgs()
 	threadsParsed := args[1].GetParsed()
 	inputParsed := args[2].GetParsed()
-	outputParsed := args[3].GetParsed()
+	// outputParsed := args[3].GetParsed()
 
-	var parsedThreads *[]*threads.Thread
+	var threadIds *[]string
 	var err error
 
 	// Input flow
 	if threadsParsed { // List passed
-		parsedThreads, err = threads.ListInput(g.threadsArg)
+		threadIds, err = threads.ListInput(g.threadsArg)
 
 		if err != nil {
-
+			panic(err);
 		}
 
 	} else if inputParsed { // File input passed
-		parsedThreads, err = threads.FileInput((*g.inputArg))
+		threadIds, err = threads.FileInput((*g.inputArg))
 
 		if err != nil {
-
+			panic(err);
 		}
 
 	} else { // No input passed
@@ -75,24 +77,14 @@ func (g *GetCommand) Run() error {
 		return err
 	}
 
+	// retrieval flow
+	threads := threads.RetrieveThreads(key, threadIds)
+	jsonData, err := json.MarshalIndent(*threads, "", "  ")
+	fmt.Println(string(jsonData));
+
+	// Parse flow
+
 	// Output flow
-	if outputParsed {
-		b, err := threads.ThreadsToJson(parsedThreads)
-
-		if err != nil {
-			panic(err)
-		}
-
-		threads.FileOutput(*g.outputArg, b)
-
-	} else {
-		fmt.Printf("Printing messages.\n")
-		fmt.Printf("Messages:\n")
-
-		for _, msg := range *parsedThreads {
-			fmt.Printf("%v\n", *msg)
-		}
-	}
 
 	return nil
 }

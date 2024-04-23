@@ -35,10 +35,10 @@ func NewService(parser *argparse.Parser) *ThreadsService {
 	}
 }
 
-func (t *ThreadsService) Run() error {
+func (t *ThreadsService) Run(key string) error {
 
 	if t.getCommand.Happened() {
-		err := t.getCommand.Run()
+		err := t.getCommand.Run(key)
 
 		if err != nil {
 			fmt.Println(err.Error())
@@ -46,7 +46,7 @@ func (t *ThreadsService) Run() error {
 		}
 
 	} else if t.delCommand.Happened() {
-		err := t.delCommand.Run()
+		err := t.delCommand.Run(key)
 
 		if err != nil {
 			fmt.Println(err.Error())

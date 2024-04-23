@@ -5,38 +5,99 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
+
+	"github.com/jackitaliano/oait-go/internal/openai"
 )
 
 type Thread struct {
-	threadId string
-	messages []map[string]string
+	ThreadId string `json:"thread_id"`
+	Messages []map[string]string `json:"messages"`
 }
 
-func ListInput(threadIds *[]string) (*[]*Thread, error) {
-	var threads []*Thread
+func ListInput(threadIds *[]string) (*[]string, error) {
+	var allThreadIds []string
 
-	fmt.Println(threadIds)
+	for _, idsStr := range *threadIds {
+		ids := splitIds(idsStr, " ")
 
-	for _, threadId := range *threadIds {
-		messages := []map[string]string{{"role": "user", "text": "test text"}}
-
-		thread := &Thread{threadId, messages}
-
-		threads = append(threads, thread)
+		for _, id := range *ids {
+			allThreadIds = append(allThreadIds, id)
+		}
 	}
 
-	return &threads, nil
+	return &allThreadIds, nil
 }
 
-func FileInput(fileName string) ( *[]*Thread, error ) {
-	var threads = []*Thread{}
+func txtInput(fileName string) ( *[]string, error ) {
+	data, err := os.ReadFile(fileName)
 
-	messages := []map[string]string{{"role": "user", "text": "test text"}}
-	thread := &Thread{fileName, messages}
-	threads = append(threads, thread)
+	if err != nil {
+		err = errors.New("Failed reading file: " + fileName + ". Error: " + err.Error())
+		return nil, err
+	}
 
-	return &threads, nil
+	stringData := string(data)
+	threadIds := splitIds(stringData, "\n");
 
+	return threadIds, nil
+}
+
+func splitIds(str string, delimeter string) (*[]string) {
+	splitString := strings.Split(str, delimeter)
+
+	for i, val := range splitString {
+		splitString[i] = strings.Trim(val, " ")
+	}
+
+	return &splitString
+}
+
+func FileInput(fileName string) ( *[]string, error ) {
+	var data *[]string
+	var err error
+
+	fileExt := fileName[len(fileName)-3:]
+	fmt.Printf("ext: %v\n", fileExt)
+	if fileExt == "txt" {
+		data, err = txtInput(fileName)
+
+		if err != nil {
+			data = &[]string{}
+		}
+
+	} else {
+		err = errors.New("Invalid file input type")
+	}
+
+	return data, err
+
+}
+
+func retrieveThread(c chan []openai.Message, key string, threadId string) {
+	messageResponse, err := openai.GetThreadMessages(key, threadId)
+
+	if (err != nil) {
+		fmt.Println(err)
+	}
+
+	messageData := messageResponse.Data
+	c <- messageData
+}
+
+func RetrieveThreads(key string, threadIds *[]string) ( *[][]openai.Message ) {
+	c := make(chan []openai.Message)
+
+	for _, threadId := range *threadIds {
+		go retrieveThread(c, key, threadId)
+	}
+
+	results := make([][]openai.Message, len(*threadIds))
+	for i := range results {
+		results[i] = <-c
+	}
+
+	return &results
 }
 
 func ThreadsToJson(threads *[]*Thread) (*[]byte, error) {
@@ -46,11 +107,10 @@ func ThreadsToJson(threads *[]*Thread) (*[]byte, error) {
 		threadsExpanded = append(threadsExpanded, *thread)
 	}
 
-	fmt.Println(threadsExpanded)
-
-	b, err := json.Marshal(threadsExpanded)
+	b, err := json.MarshalIndent(threadsExpanded, "", "	")
 
 	if err != nil {
+		err = errors.New("JSON Marshal failed with error: " + err.Error())
 		return nil, err
 	}
 
@@ -58,8 +118,6 @@ func ThreadsToJson(threads *[]*Thread) (*[]byte, error) {
 }
 
 func FileOutput(fileName string, data *[]byte) error {
-	fmt.Printf("Outputting messages to: %v\n", fileName)
-
 	err := os.WriteFile(fileName, *data, 0644)
 
 	if err != nil {
