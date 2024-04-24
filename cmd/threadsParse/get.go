@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jackitaliano/oait-go/internal/openai"
 	"github.com/jackitaliano/oait-go/internal/threads"
 
 	"github.com/akamensky/argparse"
@@ -17,14 +18,14 @@ type GetCommand struct {
 
 	threadsArg          *[]string
 	inputArg            *string
+	sessionArg *string
+	orgArg *string
 	outputArg           *string
 	rawFlag             *bool
-	filterFlag          *bool
-	filterTimeLTEFlag   *bool
-	filterTimeGTFlag    *bool
-	filterLengthLTEFlag *bool
-	filterLengthGTFlag  *bool
-	filterValue         *float64
+	timeLTEArg   *float64
+	timeGTArg    *float64
+	lengthLTEArg *float64
+	lengthGTArg  *float64
 }
 
 func NewGetCommand(command *argparse.Command) *GetCommand {
@@ -33,16 +34,16 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 
 	subCommand := command.NewCommand(name, desc)
 
-	threadsArg := subCommand.StringList("n", "threads", &argparse.Options{Required: false, Help: "List of Thread IDs"})
+	threadsArg := subCommand.StringList("t", "threads", &argparse.Options{Required: false, Help: "List of Thread IDs"})
 	inputArg := subCommand.String("i", "input", &argparse.Options{Required: false, Help: "Thread File Input"})
+	sessionArg := subCommand.String("s", "session", &argparse.Options{Required: false, Help: "Retrieve Threads from session-id"})
+	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "Thread File Output"})
 	rawFlag := subCommand.Flag("r", "raw", &argparse.Options{Required: false, Help: "Output raw Threads"})
-	filterFlag := subCommand.Flag("f", "filter", &argparse.Options{Required: false, Help: "Filter threads, accompanied by another filter flag\n\tEx: `-ft -v 5` yields threads that are less than or equal to 5 days old."})
-	filterTimeLTEFlag := subCommand.Flag("t", "filter-time", &argparse.Options{Required: false, Help: "Filter time (days) LTE"})
-	filterTimeGTFlag := subCommand.Flag("T", "filter-Time", &argparse.Options{Required: false, Help: "Filter time (days) GT"})
-	filterLengthLTEFlag := subCommand.Flag("l", "filter-length", &argparse.Options{Required: false, Help: "Filter length LTE"})
-	filterLengthGTFlag := subCommand.Flag("L", "filter-Length", &argparse.Options{Required: false, Help: "Filter length GT"})
-	filterValue := subCommand.Float("v", "filter-value", &argparse.Options{Required: false, Help: "Filter Value (float)"})
+	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
+	timeGTArg := subCommand.Float("D", "Days", &argparse.Options{Required: false, Help: "Filter by GT days"})
+	lengthLTEArg := subCommand.Float("l", "length", &argparse.Options{Required: false, Help: "Filter by LTE to length"})
+	lengthGTArg := subCommand.Float("L", "Length", &argparse.Options{Required: false, Help: "Filter by GT length"})
 
 	return &GetCommand{
 		name,
@@ -50,14 +51,14 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 		subCommand,
 		threadsArg,
 		inputArg,
+		sessionArg,
+		orgArg,
 		outputArg,
 		rawFlag,
-		filterFlag,
-		filterTimeLTEFlag,
-		filterTimeGTFlag,
-		filterLengthLTEFlag,
-		filterLengthGTFlag,
-		filterValue,
+		timeLTEArg,
+		timeGTArg,
+		lengthLTEArg,
+		lengthGTArg,
 	}
 }
 
@@ -68,96 +69,149 @@ func (g *GetCommand) Happened() bool {
 
 func (g *GetCommand) Run(key string) error {
 	args := g.command.GetArgs()
-	threadsParsed := args[1].GetParsed()
-	inputParsed := args[2].GetParsed()
-	outputParsed := args[3].GetParsed()
-	rawParsed := args[4].GetParsed()
-	filterParsed := args[5].GetParsed()
-	filterTimeLTEParsed := args[6].GetParsed()
-	filterTimeGTParsed := args[7].GetParsed()
-	filterLengthLTEParsed := args[8].GetParsed()
-	filterLengthGTParsed := args[9].GetParsed()
-	filterValueParsed := args[10].GetParsed()
 
-	// outputParsed := args[3].GetParsed()
 
-	var threadIds []string
-	var err error
+	fmt.Printf("Retrieving thread ids...\t")
+	threadIds, err := g.getThreadIds(&args)
 
-	// Input flow
-	if threadsParsed { // List passed
-		threadIds, err = threads.ListInput(*g.threadsArg)
-
-		if err != nil {
-			panic(err)
-		}
-
-	} else if inputParsed { // File input passed
-		threadIds, err = threads.FileInput(*g.inputArg)
-
-		if err != nil {
-			panic(err)
-		}
-
-	} else { // No input passed
-		errMsg := fmt.Sprintf("No input options passed to `%v`\n", g.name)
-		helpMsg := g.command.Help(errMsg)
-
-		err := errors.New(helpMsg)
+	if err != nil {
 		return err
 	}
 
-	// Retrieval flow
-	rawThreads := threads.RetrieveThreads(key, &threadIds)
+	fmt.Printf("✓\n")
 
-	// Filter flow
-	if filterParsed {
-		if !filterValueParsed {
-			err = errors.New("Error: cannot pass filter without filter value")
-			panic(err)
-		}
+	fmt.Printf("Retrieving threads...\t\t")
+	rawThreads := threads.RetrieveThreads(key, &threadIds, *g.orgArg)
+	fmt.Printf("✓\n")
 
-		if filterTimeLTEParsed {
-			rawThreads = threads.FilterByDaysLTE(rawThreads, *g.filterValue)
+	fmt.Printf("Filtering threads...\t\t")
+	filteredThreads := g.filterThreads(&args, rawThreads)
+	fmt.Printf("✓\n")
 
-		} else if filterTimeGTParsed {
-			rawThreads = threads.FilterByDaysGT(rawThreads, *g.filterValue)
+	fmt.Printf("Formatting thread output...\t")
+	threadsOutput, err := g.getThreadsOutput(&args, threadIds, filteredThreads)
 
-		}
-
-		// Filter length flow
-		if filterLengthLTEParsed {
-			rawThreads = threads.FilterByLengthLTE(rawThreads, *g.filterValue)
-
-		} else if filterLengthGTParsed {
-			rawThreads = threads.FilterByLengthGT(rawThreads, *g.filterValue)
-
-		}
+	if err != nil {
+		return err
 	}
-	var threadOutput []byte
+	fmt.Printf("✓\n")
 
-	// Raw flow
-	if rawParsed && *(g.rawFlag) {
-		threadOutput, err = json.MarshalIndent(*rawThreads, "", "\t")
+	fmt.Printf("Outputting threads... \n\n")
+	err = g.outputThreads(&args, threadsOutput)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *GetCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
+	threadsParsed := (*args)[1].GetParsed()
+	inputParsed := (*args)[2].GetParsed()
+	sessionParsed := (*args)[3].GetParsed()
+
+	if threadsParsed { // List passed
+		threadIds, err := threads.ListInput(*g.threadsArg)
 
 		if err != nil {
-			fmt.Printf("Error marshalling json: %v\n", err)
-			return nil
+			return nil, err
+		}
+
+		return threadIds, nil
+
+	} 
+
+	if inputParsed { // File input passed
+		threadIds, err := threads.FileInput(*g.inputArg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return threadIds, nil
+	} 
+
+	if sessionParsed {
+		threadIds, err := threads.SessionInput(*g.sessionArg, *g.orgArg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return threadIds, nil
+
+	} 
+
+	errMsg := fmt.Sprintf("No input options passed to `%v`\n", g.name)
+	err := errors.New(errMsg)
+
+	return nil, err
+}
+
+func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[][]openai.Message) (*[][]openai.Message) {
+	timeLTEParsed := (*args)[7].GetParsed()
+	timeGTParsed := (*args)[8].GetParsed()
+	lengthLTEParsed := (*args)[9].GetParsed()
+	lengthGTParsed := (*args)[10].GetParsed()
+
+	if timeLTEParsed {
+		return threads.FilterByDaysLTE(rawThreads, *g.timeLTEArg)
+
+	} else if timeGTParsed {
+		return threads.FilterByDaysGT(rawThreads, *g.timeGTArg)
+	}
+
+	// Filter length flow
+	if lengthLTEParsed {
+		return threads.FilterByLengthLTE(rawThreads, *g.lengthLTEArg)
+
+	} else if lengthGTParsed {
+		return threads.FilterByLengthGT(rawThreads, *g.lengthGTArg)
+	}
+
+	return rawThreads
+}
+
+func (g *GetCommand) getThreadsOutput(args *[]argparse.Arg, threadIds []string, filteredThreads *[][]openai.Message) (*[]byte, error) {
+	rawParsed := (*args)[6].GetParsed()
+
+	if rawParsed && *(g.rawFlag) {
+		threadOutput, err := json.MarshalIndent(*filteredThreads, "", "\t")
+
+		if err != nil {
+			errMsg := fmt.Sprintf("Error marshalling json: %v\n", err)
+			err := errors.New(errMsg)
+
+			return nil, err
+		}
+
+		return &threadOutput, nil
+
+	} 
+
+	parsedThreads := threads.ParseThreads(threadIds, filteredThreads)
+	threadOutput, err := threads.ThreadsToJson(parsedThreads)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &threadOutput, nil
+}
+
+func (g *GetCommand) outputThreads(args *[]argparse.Arg, output *[]byte) (error) {
+	outputParsed := (*args)[5].GetParsed()
+
+	if outputParsed {
+		err := threads.FileOutput(*g.outputArg, output)
+
+		if err != nil {
+			return err
 		}
 
 	} else {
-		parsedThreads := threads.ParseThreads(rawThreads)
-		threadOutput, err = threads.ThreadsToJson(parsedThreads)
-	}
-
-	// Parse flow
-
-	// Output flow
-
-	if outputParsed {
-		err = threads.FileOutput(*g.outputArg, &threadOutput)
-	} else {
-		fmt.Printf("%v\n", string(threadOutput))
+		fmt.Printf("%v\n", string(*output))
 	}
 
 	return nil

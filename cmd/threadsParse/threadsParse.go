@@ -41,7 +41,7 @@ func (t *ThreadsService) Run(key string) error {
 		err := t.getCommand.Run(key)
 
 		if err != nil {
-			fmt.Println(err.Error())
+			fmt.Printf("ERROR: %v", err.Error())
 			os.Exit(1)
 		}
 
@@ -49,7 +49,7 @@ func (t *ThreadsService) Run(key string) error {
 		err := t.delCommand.Run(key)
 
 		if err != nil {
-			fmt.Println(err.Error())
+			fmt.Printf("ERROR: %v", err.Error())
 			os.Exit(1)
 		}
 
