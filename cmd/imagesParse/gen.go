@@ -12,8 +12,8 @@ type GenCommand struct {
 	desc    string
 	command *argparse.Command
 
-	promptArg  *string
-	outputArg  *string
+	promptArg *string
+	outputArg *string
 }
 
 func NewGenCommand(command *argparse.Command) *GenCommand {
