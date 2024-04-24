@@ -9,36 +9,36 @@ import (
 )
 
 type MessageText struct {
-	Value string `json:"value"`
+	Value       string              `json:"value"`
 	Annotations []map[string]string `json:"annotations"`
 }
 
 type MessageContent struct {
-	Type string `json:"type"`
+	Type string      `json:"type"`
 	Text MessageText `json:"text"`
 }
 
 type Message struct {
-	Id string `json:"id"`
-	Object string `json:"object"`
-	CreatedAt int `json:"created_at"`
-	AssistantId string `json:"assistant_id"`
-	ThreadId string `json:"thread_id"`
-	RunId string `json:"run_id"`
-	Role string `json:"role"`
-	Content []MessageContent `json:"content"`
+	Id          string           `json:"id"`
+	Object      string           `json:"object"`
+	CreatedAt   int              `json:"created_at"`
+	AssistantId string           `json:"assistant_id"`
+	ThreadId    string           `json:"thread_id"`
+	RunId       string           `json:"run_id"`
+	Role        string           `json:"role"`
+	Content     []MessageContent `json:"content"`
 }
 
 type MessagesResponse struct {
-	Object string `json:"object"`
-	Data []Message `json:"data"`
+	Object string    `json:"object"`
+	Data   []Message `json:"data"`
 }
 
 type Error struct {
 	Message string `json:"message"`
-	Type string `json:"type"`
-	Param string `json:"param"`
-	Code string `json:"code"`
+	Type    string `json:"type"`
+	Param   string `json:"param"`
+	Code    string `json:"code"`
 }
 
 type ErrorResponse struct {
@@ -60,7 +60,7 @@ func GetThreadMessages(key string, threadId string) (MessagesResponse, error) {
 		return MessagesResponse{"", []Message{}}, err
 	}
 
-	req.Header.Set("Authorization", "Bearer " + key)
+	req.Header.Set("Authorization", "Bearer "+key)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("OpenAI-Beta", "assistants=v2")
 

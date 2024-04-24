@@ -6,8 +6,8 @@ import (
 
 	"github.com/akamensky/argparse"
 
-	"github.com/jackitaliano/oait-go/cmd/threadsParse"
 	"github.com/jackitaliano/oait-go/cmd/imagesParse"
+	"github.com/jackitaliano/oait-go/cmd/threadsParse"
 )
 
 func main() {
@@ -15,10 +15,10 @@ func main() {
 	const progDesc = "OpenAI Tools"
 
 	parser := argparse.NewParser(progName, progDesc)
-	keyArg := parser.String("k", "key", &argparse.Options{ 
-		Required: false, 
-		Help: "OpenAI API Key (default to env var 'OPENAI_API_KEY')",
-		Default: os.Getenv("OPENAI_API_KEY"),
+	keyArg := parser.String("k", "key", &argparse.Options{
+		Required: false,
+		Help:     "OpenAI API Key (default to env var 'OPENAI_API_KEY')",
+		Default:  os.Getenv("OPENAI_API_KEY"),
 	})
 
 	threadsService := threadsParse.NewService(parser)
