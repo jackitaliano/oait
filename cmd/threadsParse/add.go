@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jackitaliano/oait-go/internal/openai"
-	"github.com/jackitaliano/oait-go/internal/threads"
-	"github.com/jackitaliano/oait-go/internal/tui"
+	"github.com/jackitaliano/oait/internal/openai"
+	"github.com/jackitaliano/oait/internal/threads"
+	"github.com/jackitaliano/oait/internal/tui"
 
 	"github.com/akamensky/argparse"
 )

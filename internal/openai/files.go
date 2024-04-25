@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/jackitaliano/oait-go/internal/request"
+	"github.com/jackitaliano/oait/internal/request"
 )
 
 type FileObject struct {

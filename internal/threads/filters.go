@@ -3,7 +3,7 @@ package threads
 import (
 	"time"
 
-	"github.com/jackitaliano/oait-go/internal/openai"
+	"github.com/jackitaliano/oait/internal/openai"
 )
 
 func FilterByDaysLTE(threads *[][]openai.Message, days float64) *[][]openai.Message {

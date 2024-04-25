@@ -1,5 +1,5 @@
-module github.com/jackitaliano/oait-go
+module github.com/jackitaliano/oait
 
-go 1.22.1
+go 1.22
 
-require github.com/akamensky/argparse v1.4.0 // indirect
+require github.com/akamensky/argparse v1.4.0 // direct

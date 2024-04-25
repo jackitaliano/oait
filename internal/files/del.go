@@ -3,7 +3,7 @@ package files
 import (
 	"fmt"
 
-	"github.com/jackitaliano/oait-go/internal/openai"
+	"github.com/jackitaliano/oait/internal/openai"
 )
 
 func deleteFile(c chan *openai.FileDeleteResponse, key string, fileId string, orgId string) {

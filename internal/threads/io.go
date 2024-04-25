@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jackitaliano/oait-go/internal/openai"
+	"github.com/jackitaliano/oait/internal/openai"
 )
 
 func SingleInput(threadId string) (string, error) {

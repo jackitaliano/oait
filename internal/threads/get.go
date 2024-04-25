@@ -3,7 +3,7 @@ package threads
 import (
 	"fmt"
 
-	"github.com/jackitaliano/oait-go/internal/openai"
+	"github.com/jackitaliano/oait/internal/openai"
 )
 
 func retrieveThread(c chan []openai.Message, key string, threadId string, orgId string) {

@@ -6,9 +6,9 @@ import (
 
 	"github.com/akamensky/argparse"
 
-	"github.com/jackitaliano/oait-go/cmd/imagesParse"
-	"github.com/jackitaliano/oait-go/cmd/threadsParse"
-	"github.com/jackitaliano/oait-go/cmd/filesParse"
+	"github.com/jackitaliano/oait/cmd/imagesParse"
+	"github.com/jackitaliano/oait/cmd/threadsParse"
+	"github.com/jackitaliano/oait/cmd/filesParse"
 )
 
 func main() {

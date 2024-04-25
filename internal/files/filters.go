@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/jackitaliano/oait-go/internal/openai"
+	"github.com/jackitaliano/oait/internal/openai"
 )
 
 func FilterByDaysLTE(files *[]openai.FileObject, days float64) (*[]openai.FileObject, error) {

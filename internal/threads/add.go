@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/jackitaliano/oait-go/internal/openai"
+	"github.com/jackitaliano/oait/internal/openai"
 )
 
 func AddMessage(key string, threadId string, createdMessage *openai.CreatedMessage, orgId string) (*openai.Message, error) {
