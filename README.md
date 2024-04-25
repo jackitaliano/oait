@@ -1,4 +1,4 @@
-# OpenAI Thread/Image Retrievel Tool
+# OpenAI Tools
 CLI retrieve, modify, or add threads, files, images, etc. individually, programatically, etc.
 
 For info:
