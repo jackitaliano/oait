@@ -32,8 +32,8 @@ func NewDelCommand(command *argparse.Command) *DelCommand {
 
 	subCommand := command.NewCommand(name, desc)
 
-	filesArg := subCommand.StringList("f", "files", &argparse.Options{Required: false, Help: "List of File IDs"})
-	inputArg := subCommand.String("i", "input", &argparse.Options{Required: false, Help: "File File Input"})
+	filesArg := subCommand.StringList("i", "ids", &argparse.Options{Required: false, Help: "List of File IDs"})
+	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "File File Input"})
 	allFlag := subCommand.Flag("A", "all", &argparse.Options{Required: false, Help: "Get all files"})
 	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "File File Output"})

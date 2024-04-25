@@ -30,7 +30,7 @@ func NewAddCommand(command *argparse.Command) *AddCommand {
 	subCommand := command.NewCommand(name, desc)
 
 	threadArg := subCommand.String("t", "threads", &argparse.Options{Required: true, Help: "Thread Id to add message to"})
-	inputArg := subCommand.String("i", "input", &argparse.Options{Required: false, Help: "Thread File Input"})
+	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "Thread File Input"})
 	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
 	messageArg := subCommand.String("m", "msg", &argparse.Options{Required: false, Help: "Message text to add"})
 	roleArg := subCommand.String("r", "role", &argparse.Options{Required: false, Help: "Message role to add", Default: "user"})

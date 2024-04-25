@@ -35,7 +35,7 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 	subCommand := command.NewCommand(name, desc)
 
 	threadsArg := subCommand.StringList("t", "threads", &argparse.Options{Required: false, Help: "List of Thread IDs"})
-	inputArg := subCommand.String("i", "input", &argparse.Options{Required: false, Help: "Thread File Input"})
+	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "Thread File Input"})
 	sessionArg := subCommand.String("s", "session", &argparse.Options{Required: false, Help: "Retrieve Threads from session-id"})
 	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "Thread File Output"})
