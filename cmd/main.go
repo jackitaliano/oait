@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackitaliano/oait-go/cmd/imagesParse"
 	"github.com/jackitaliano/oait-go/cmd/threadsParse"
+	"github.com/jackitaliano/oait-go/cmd/filesParse"
 )
 
 func main() {
@@ -21,6 +22,7 @@ func main() {
 	})
 
 	threadsService := threadsParse.NewService(parser)
+	filesService := filesParse.NewService(parser)
 	imagesService := imagesParse.NewService(parser)
 
 	err := parser.Parse(os.Args)
@@ -36,10 +38,19 @@ func main() {
 	var commands []*argparse.Command = parser.GetCommands()
 
 	var threadsCommand *argparse.Command = commands[0]
-	var imagesCommand *argparse.Command = commands[1]
+	var filesCommand *argparse.Command = commands[1]
+	var imagesCommand *argparse.Command = commands[2]
 
 	if threadsCommand.Happened() {
 		err := threadsService.Run(*keyArg)
+
+		if err != nil {
+			fmt.Print(err.Error())
+			os.Exit(1)
+		}
+
+	} else if filesCommand.Happened() {
+		err := filesService.Run(*keyArg)
 
 		if err != nil {
 			fmt.Print(err.Error())
