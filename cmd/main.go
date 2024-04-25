@@ -32,7 +32,6 @@ func main() {
 	if *keyArg == "" {
 		*keyArg = os.Getenv("OPENAI_API_KEY")
 	}
-	
 
 	var commands []*argparse.Command = parser.GetCommands()
 

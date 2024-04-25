@@ -16,11 +16,11 @@ type AddCommand struct {
 	desc    string
 	command *argparse.Command
 
-	threadArg          *string
-	inputArg            *string
-	orgArg *string
+	threadArg  *string
+	inputArg   *string
+	orgArg     *string
 	messageArg *string
-	roleArg *string
+	roleArg    *string
 }
 
 func NewAddCommand(command *argparse.Command) *AddCommand {
@@ -53,7 +53,6 @@ func (a *AddCommand) Happened() bool {
 
 func (a *AddCommand) Run(key string) error {
 	args := a.command.GetArgs()
-
 
 	threadId, err := a.getThreadId(&args)
 
@@ -111,7 +110,7 @@ func (a *AddCommand) getThreadId(args *[]argparse.Arg) (*string, error) {
 		}
 
 		return &threadId, nil
-	} 
+	}
 
 	errMsg := fmt.Sprintf("No input options passed to `%v`\n", a.name)
 	err := errors.New(errMsg)

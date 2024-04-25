@@ -38,27 +38,27 @@ type MessagesResponse struct {
 }
 
 type Thread struct {
-	Object string `json:"object"`
-	Id string `json:"id"`
-	CreatedAt int `json:"created_at"`
+	Object    string `json:"object"`
+	Id        string `json:"id"`
+	CreatedAt int    `json:"created_at"`
 }
 
 type SessionThreadsResponse struct {
-	Object string    `json:"object"`
-	Data   []Thread `json:"data"`
-	FirstId string `json:"first_id"`
-	LastId string `json:"last_id"`
-	HasMore bool `json:"has_more"`
+	Object  string   `json:"object"`
+	Data    []Thread `json:"data"`
+	FirstId string   `json:"first_id"`
+	LastId  string   `json:"last_id"`
+	HasMore bool     `json:"has_more"`
 }
 
 type ThreadDeleteResponse struct {
-	Object string `json:"object"`
-	Id string `json:"id"`
-	Deleted bool `json:"deleted"`
+	Object  string `json:"object"`
+	Id      string `json:"id"`
+	Deleted bool   `json:"deleted"`
 }
 
 type CreatedMessage struct {
-	Role string `json:"role"`
+	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 

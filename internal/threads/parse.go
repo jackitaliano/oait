@@ -1,8 +1,8 @@
 package threads
 
 import (
-	"errors"
 	"encoding/json"
+	"errors"
 
 	"github.com/jackitaliano/oait-go/internal/openai"
 )
@@ -16,7 +16,6 @@ type Thread struct {
 	ThreadId string    `json:"thread_id,omitempty"`
 	Messages []Message `json:"messages,omitempty"`
 }
-
 
 func ParseThreads(threadIds []string, threads *[][]openai.Message) *[]Thread {
 	c := make(chan Thread)

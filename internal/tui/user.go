@@ -1,11 +1,11 @@
 package tui
 
 import (
-	"os"
-	"strings"
 	"bufio"
 	"fmt"
+	"os"
 	"regexp"
+	"strings"
 )
 
 func YesNoLoop(question string) bool {
@@ -18,13 +18,13 @@ func YesNoLoop(question string) bool {
 		text = strings.Replace(text, "\r\n", "", -1)
 
 		matchYes, _ := regexp.MatchString("[yY][eE]?[sS]?", text)
-		matchNo, _ := regexp.MatchString("[nN][oO]?", text) 
+		matchNo, _ := regexp.MatchString("[nN][oO]?", text)
 
 		if matchYes {
-			return true;
+			return true
 
 		} else if matchNo {
-			return false;
+			return false
 
 		}
 	}

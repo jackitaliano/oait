@@ -7,7 +7,7 @@ import (
 	"github.com/jackitaliano/oait-go/internal/openai"
 )
 
-func AddMessage(key string, threadId string, createdMessage *openai.CreatedMessage, orgId string) (*openai.Message, error){
+func AddMessage(key string, threadId string, createdMessage *openai.CreatedMessage, orgId string) (*openai.Message, error) {
 	message, err := openai.AddMessage(key, threadId, createdMessage, orgId)
 
 	if err != nil {
@@ -17,7 +17,7 @@ func AddMessage(key string, threadId string, createdMessage *openai.CreatedMessa
 	return message, nil
 }
 
-func CreateMessage(text string, role string) (*openai.CreatedMessage) {
+func CreateMessage(text string, role string) *openai.CreatedMessage {
 	message := openai.CreatedMessage{Role: role, Content: text}
 
 	return &message

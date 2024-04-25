@@ -40,4 +40,3 @@ func DeleteThreads(key string, threadIds []string, orgId string) int {
 
 	return numDeleted
 }
-

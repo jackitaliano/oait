@@ -41,4 +41,3 @@ func RetrieveThreads(key string, threadIds []string, orgId string) *[][]openai.M
 
 	return &threads
 }
-

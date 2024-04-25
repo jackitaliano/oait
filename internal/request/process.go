@@ -2,9 +2,9 @@ package request
 
 import (
 	"encoding/json"
-	"net/http"
 	"errors"
 	"fmt"
+	"net/http"
 )
 
 type Error struct {
@@ -14,12 +14,11 @@ type Error struct {
 	Code    string `json:"code"`
 }
 
-
 type ErrorResponse struct {
 	Error Error `json:"error"`
 }
 
-type Response interface {}
+type Response interface{}
 
 func Process[T Response](req *http.Request) (*T, error) {
 	client := &http.Client{}

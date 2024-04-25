@@ -16,12 +16,12 @@ type GetCommand struct {
 	desc    string
 	command *argparse.Command
 
-	threadsArg          *[]string
-	inputArg            *string
-	sessionArg *string
-	orgArg *string
-	outputArg           *string
-	rawFlag             *bool
+	threadsArg   *[]string
+	inputArg     *string
+	sessionArg   *string
+	orgArg       *string
+	outputArg    *string
+	rawFlag      *bool
 	timeLTEArg   *float64
 	timeGTArg    *float64
 	lengthLTEArg *float64
@@ -69,7 +69,6 @@ func (g *GetCommand) Happened() bool {
 
 func (g *GetCommand) Run(key string) error {
 	args := g.command.GetArgs()
-
 
 	fmt.Printf("Retrieving thread ids...\t")
 	threadIds, err := g.getThreadIds(&args)
@@ -120,7 +119,7 @@ func (g *GetCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
 
 		return threadIds, nil
 
-	} 
+	}
 
 	if inputParsed { // File input passed
 		threadIds, err := threads.FileInput(*g.inputArg)
@@ -130,7 +129,7 @@ func (g *GetCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
 		}
 
 		return threadIds, nil
-	} 
+	}
 
 	if sessionParsed {
 		threadIds, err := threads.SessionInput(*g.sessionArg, *g.orgArg)
@@ -141,7 +140,7 @@ func (g *GetCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
 
 		return threadIds, nil
 
-	} 
+	}
 
 	errMsg := fmt.Sprintf("No input options passed to `%v`\n", g.name)
 	err := errors.New(errMsg)
@@ -149,7 +148,7 @@ func (g *GetCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
 	return nil, err
 }
 
-func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[][]openai.Message) (*[][]openai.Message) {
+func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[][]openai.Message) *[][]openai.Message {
 	timeLTEParsed := (*args)[7].GetParsed()
 	timeGTParsed := (*args)[8].GetParsed()
 	lengthLTEParsed := (*args)[9].GetParsed()
@@ -188,7 +187,7 @@ func (g *GetCommand) getThreadsOutput(args *[]argparse.Arg, threadIds []string, 
 
 		return &threadOutput, nil
 
-	} 
+	}
 
 	parsedThreads := threads.ParseThreads(threadIds, filteredThreads)
 	threadOutput, err := threads.ThreadsToJson(parsedThreads)
@@ -200,7 +199,7 @@ func (g *GetCommand) getThreadsOutput(args *[]argparse.Arg, threadIds []string, 
 	return &threadOutput, nil
 }
 
-func (g *GetCommand) outputThreads(args *[]argparse.Arg, output *[]byte) (error) {
+func (g *GetCommand) outputThreads(args *[]argparse.Arg, output *[]byte) error {
 	outputParsed := (*args)[5].GetParsed()
 
 	if outputParsed {

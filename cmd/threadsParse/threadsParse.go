@@ -56,7 +56,7 @@ func (t *ThreadsService) Run(key string) error {
 			os.Exit(1)
 		}
 
-	} else if t.addCommand.Happened(){
+	} else if t.addCommand.Happened() {
 		err := t.addCommand.Run(key)
 
 		if err != nil {

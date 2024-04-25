@@ -114,4 +114,3 @@ func splitIds(str string, delimeter string) []string {
 
 	return splitString
 }
-

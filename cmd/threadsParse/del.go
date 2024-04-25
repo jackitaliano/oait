@@ -17,12 +17,12 @@ type DelCommand struct {
 	desc    string
 	command *argparse.Command
 
-	threadsArg          *[]string
-	inputArg            *string
-	sessionArg *string
-	orgArg *string
-	outputArg           *string
-	rawFlag             *bool
+	threadsArg   *[]string
+	inputArg     *string
+	sessionArg   *string
+	orgArg       *string
+	outputArg    *string
+	rawFlag      *bool
 	timeLTEArg   *float64
 	timeGTArg    *float64
 	lengthLTEArg *float64
@@ -69,7 +69,6 @@ func (d *DelCommand) Happened() bool {
 
 func (d *DelCommand) Run(key string) error {
 	args := d.command.GetArgs()
-
 
 	fmt.Printf("Retrieving thread ids...\t")
 	threadIds, err := d.getThreadIds(&args)
@@ -142,7 +141,7 @@ func (d *DelCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
 
 		return threadIds, nil
 
-	} 
+	}
 
 	if inputParsed { // File input passed
 		threadIds, err := threads.FileInput(*d.inputArg)
@@ -152,7 +151,7 @@ func (d *DelCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
 		}
 
 		return threadIds, nil
-	} 
+	}
 
 	if sessionParsed {
 		threadIds, err := threads.SessionInput(*d.sessionArg, *d.orgArg)
@@ -163,7 +162,7 @@ func (d *DelCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
 
 		return threadIds, nil
 
-	} 
+	}
 
 	errMsg := fmt.Sprintf("No input options passed to `%v`\n", d.name)
 	err := errors.New(errMsg)
@@ -171,7 +170,7 @@ func (d *DelCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
 	return nil, err
 }
 
-func (d *DelCommand) filterThreads(args *[]argparse.Arg, rawThreads *[][]openai.Message) (*[][]openai.Message) {
+func (d *DelCommand) filterThreads(args *[]argparse.Arg, rawThreads *[][]openai.Message) *[][]openai.Message {
 	timeLTEParsed := (*args)[7].GetParsed()
 	timeGTParsed := (*args)[8].GetParsed()
 	lengthLTEParsed := (*args)[9].GetParsed()
@@ -210,7 +209,7 @@ func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIds []string, 
 
 		return &threadOutput, nil
 
-	} 
+	}
 
 	parsedThreads := threads.ParseThreads(threadIds, filteredThreads)
 	threadOutput, err := threads.ThreadsToJson(parsedThreads)
@@ -222,7 +221,7 @@ func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIds []string, 
 	return &threadOutput, nil
 }
 
-func (d *DelCommand) outputThreads(args *[]argparse.Arg, output *[]byte) (error) {
+func (d *DelCommand) outputThreads(args *[]argparse.Arg, output *[]byte) error {
 	outputParsed := (*args)[5].GetParsed()
 
 	if outputParsed {
