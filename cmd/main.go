@@ -18,7 +18,6 @@ func main() {
 	keyArg := parser.String("k", "key", &argparse.Options{
 		Required: false,
 		Help:     "OpenAI API Key (default to env var 'OPENAI_API_KEY')",
-		Default:  os.Getenv("OPENAI_API_KEY"),
 	})
 
 	threadsService := threadsParse.NewService(parser)
@@ -29,6 +28,11 @@ func main() {
 		fmt.Print(parser.Usage(err))
 		os.Exit(1)
 	}
+
+	if *keyArg == "" {
+		*keyArg = os.Getenv("OPENAI_API_KEY")
+	}
+	
 
 	var commands []*argparse.Command = parser.GetCommands()
 

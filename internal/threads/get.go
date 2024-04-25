@@ -20,14 +20,14 @@ func retrieveThread(c chan []openai.Message, key string, threadId string, orgId 
 	c <- messageData
 }
 
-func RetrieveThreads(key string, threadIds *[]string, orgId string) *[][]openai.Message {
+func RetrieveThreads(key string, threadIds []string, orgId string) *[][]openai.Message {
 	c := make(chan []openai.Message)
 
-	for _, threadId := range *threadIds {
+	for _, threadId := range threadIds {
 		go retrieveThread(c, key, threadId, orgId)
 	}
 
-	results := make([][]openai.Message, len(*threadIds))
+	results := make([][]openai.Message, len(threadIds))
 	for i := range results {
 		results[i] = <-c
 	}

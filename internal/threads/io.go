@@ -8,6 +8,18 @@ import (
 	"github.com/jackitaliano/oait-go/internal/openai"
 )
 
+func SingleInput(threadId string) (string, error) {
+	trimmedString := strings.Trim(threadId, " ")
+
+	if trimmedString == "" {
+		errMsg := "Invalid thread id passed ' '"
+		err := errors.New(errMsg)
+		return "", err
+	}
+
+	return trimmedString, nil
+}
+
 func ListInput(threadIds []string) ([]string, error) {
 	var allThreadIds []string
 

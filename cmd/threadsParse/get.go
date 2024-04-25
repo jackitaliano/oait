@@ -81,7 +81,7 @@ func (g *GetCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Retrieving threads...\t\t")
-	rawThreads := threads.RetrieveThreads(key, &threadIds, *g.orgArg)
+	rawThreads := threads.RetrieveThreads(key, threadIds, *g.orgArg)
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering threads...\t\t")

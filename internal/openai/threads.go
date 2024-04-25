@@ -1,6 +1,8 @@
 package openai
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -47,6 +49,17 @@ type SessionThreadsResponse struct {
 	FirstId string `json:"first_id"`
 	LastId string `json:"last_id"`
 	HasMore bool `json:"has_more"`
+}
+
+type ThreadDeleteResponse struct {
+	Object string `json:"object"`
+	Id string `json:"id"`
+	Deleted bool `json:"deleted"`
+}
+
+type CreatedMessage struct {
+	Role string `json:"role"`
+	Content string `json:"content"`
 }
 
 func GetThreadMessages(key string, threadId string, orgId string) (*MessagesResponse, error) {
@@ -109,3 +122,68 @@ func GetSessionThreads(sessionId string, orgId string) (*SessionThreadsResponse,
 	return resBody, nil
 }
 
+func DeleteThread(key string, threadId string, orgId string) (*ThreadDeleteResponse, error) {
+	url := fmt.Sprintf("https://api.openai.com/v1/threads/%v", threadId)
+	method := "DELETE"
+	var reqBody io.Reader = nil
+
+	req, err := http.NewRequest(method, url, reqBody)
+
+	if err != nil {
+		errMsg := fmt.Sprintf("Error creating request to '%v':\nError: %v", url, err)
+		err = errors.New(errMsg)
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+key)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("OpenAI-Beta", "assistants=v2")
+
+	if orgId != "" {
+		req.Header.Set("Openai-Organization", orgId)
+	}
+
+	resBody, err := request.Process[ThreadDeleteResponse](req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resBody, nil
+}
+
+func AddMessage(key string, threadId string, message *CreatedMessage, orgId string) (*Message, error) {
+	url := fmt.Sprintf("https://api.openai.com/v1/threads/%v/messages", threadId)
+	method := "POST"
+
+	jsonData, err := json.Marshal(message)
+	if err != nil {
+		return nil, err
+	}
+
+	reqBody := bytes.NewReader(jsonData)
+
+	req, err := http.NewRequest(method, url, reqBody)
+
+	if err != nil {
+		errMsg := fmt.Sprintf("Error creating request to '%v':\nError: %v", url, err)
+		err = errors.New(errMsg)
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+key)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("OpenAI-Beta", "assistants=v2")
+
+	if orgId != "" {
+		req.Header.Set("Openai-Organization", orgId)
+	}
+
+	resBody, err := request.Process[Message](req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resBody, nil
+}

@@ -15,6 +15,7 @@ type ThreadsService struct {
 
 	getCommand *GetCommand
 	delCommand *DelCommand
+	addCommand *AddCommand
 }
 
 func NewService(parser *argparse.Parser) *ThreadsService {
@@ -25,6 +26,7 @@ func NewService(parser *argparse.Parser) *ThreadsService {
 
 	get := NewGetCommand(service)
 	del := NewDelCommand(service)
+	add := NewAddCommand(service)
 
 	return &ThreadsService{
 		name,
@@ -32,6 +34,7 @@ func NewService(parser *argparse.Parser) *ThreadsService {
 		service,
 		get,
 		del,
+		add,
 	}
 }
 
@@ -47,6 +50,14 @@ func (t *ThreadsService) Run(key string) error {
 
 	} else if t.delCommand.Happened() {
 		err := t.delCommand.Run(key)
+
+		if err != nil {
+			fmt.Printf("ERROR: %v", err.Error())
+			os.Exit(1)
+		}
+
+	} else if t.addCommand.Happened(){
+		err := t.addCommand.Run(key)
 
 		if err != nil {
 			fmt.Printf("ERROR: %v", err.Error())
