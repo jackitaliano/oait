@@ -18,7 +18,7 @@ type Thread struct {
 }
 
 func ParseThreads(threadIds []string, threads *[][]openai.Message) *[]Thread {
-	c := make(chan Thread)
+	c := make(chan Thread, len(threadIds))
 
 	for i, thread := range *threads {
 		threadId := threadIds[i]

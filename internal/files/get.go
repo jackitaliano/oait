@@ -20,7 +20,7 @@ func retrieveFile(c chan openai.FileObject, key string, fileId string, orgId str
 }
 
 func RetrieveFiles(key string, threadIds []string, orgId string) *[]openai.FileObject {
-	c := make(chan openai.FileObject)
+	c := make(chan openai.FileObject, len(threadIds))
 
 	for _, threadId := range threadIds {
 		go retrieveFile(c, key, threadId, orgId)

@@ -20,7 +20,7 @@ func deleteFile(c chan *openai.FileDeleteResponse, key string, fileId string, or
 }
 
 func DeleteFiles(key string, fileIds []string, orgId string) int {
-	c := make(chan *openai.FileDeleteResponse)
+	c := make(chan *openai.FileDeleteResponse, len(fileIds))
 
 	for _, threadId := range fileIds {
 		go deleteFile(c, key, threadId, orgId)

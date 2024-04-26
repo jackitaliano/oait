@@ -182,7 +182,7 @@ func (g *GetCommand) getFilesOutput(args *[]argparse.Arg, filteredFileObjects *[
 }
 
 func (g *GetCommand) outputFiles(args *[]argparse.Arg, output *[]byte) error {
-	outputParsed := (*args)[4].GetParsed()
+	outputParsed := (*args)[5].GetParsed()
 
 	if outputParsed {
 		err := files.FileOutput(*g.outputArg, output)

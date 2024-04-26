@@ -20,7 +20,7 @@ func deleteThread(c chan *openai.ThreadDeleteResponse, key string, threadId stri
 }
 
 func DeleteThreads(key string, threadIds []string, orgId string) int {
-	c := make(chan *openai.ThreadDeleteResponse)
+	c := make(chan *openai.ThreadDeleteResponse, len(threadIds))
 
 	for _, threadId := range threadIds {
 		go deleteThread(c, key, threadId, orgId)
