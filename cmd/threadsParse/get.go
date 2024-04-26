@@ -21,7 +21,7 @@ type GetCommand struct {
 	sessionArg   *string
 	orgArg       *string
 	outputArg    *string
-	rawFlag      *bool
+	prettyFlag      *bool
 	timeLTEArg   *float64
 	timeGTArg    *float64
 	lengthLTEArg *float64
@@ -34,12 +34,12 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 
 	subCommand := command.NewCommand(name, desc)
 
-	threadsArg := subCommand.StringList("t", "threads", &argparse.Options{Required: false, Help: "List of Thread IDs"})
+	threadsArg := subCommand.StringList("i", "ids", &argparse.Options{Required: false, Help: "List of Thread IDs"})
 	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "Thread File Input"})
 	sessionArg := subCommand.String("s", "session", &argparse.Options{Required: false, Help: "Retrieve Threads from session-id"})
 	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "Thread File Output"})
-	rawFlag := subCommand.Flag("r", "raw", &argparse.Options{Required: false, Help: "Output raw Threads"})
+	prettyFlag := subCommand.Flag("p", "pretty", &argparse.Options{Required: false, Help: "Pretty print threads"})
 	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
 	timeGTArg := subCommand.Float("D", "Days", &argparse.Options{Required: false, Help: "Filter by GT days"})
 	lengthLTEArg := subCommand.Float("l", "length", &argparse.Options{Required: false, Help: "Filter by LTE to length"})
@@ -54,7 +54,7 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 		sessionArg,
 		orgArg,
 		outputArg,
-		rawFlag,
+		prettyFlag,
 		timeLTEArg,
 		timeGTArg,
 		lengthLTEArg,
@@ -74,6 +74,7 @@ func (g *GetCommand) Run(key string) error {
 	threadIds, err := g.getThreadIds(&args)
 
 	if err != nil {
+		fmt.Printf("X\n")
 		return err
 	}
 
@@ -91,6 +92,7 @@ func (g *GetCommand) Run(key string) error {
 	threadsOutput, err := g.getThreadsOutput(&args, threadIds, filteredThreads)
 
 	if err != nil {
+		fmt.Printf("X\n")
 		return err
 	}
 	fmt.Printf("✓\n")
@@ -173,26 +175,25 @@ func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[][]openai.
 }
 
 func (g *GetCommand) getThreadsOutput(args *[]argparse.Arg, threadIds []string, filteredThreads *[][]openai.Message) (*[]byte, error) {
-	rawParsed := (*args)[6].GetParsed()
+	prettyParsed := (*args)[6].GetParsed()
 
-	if rawParsed && *(g.rawFlag) {
-		threadOutput, err := json.MarshalIndent(*filteredThreads, "", "\t")
+	if prettyParsed && *(g.prettyFlag) {
+		parsedThreads := threads.ParseThreads(threadIds, filteredThreads)
+		threadOutput, err := threads.ThreadsToJson(parsedThreads)
 
 		if err != nil {
-			errMsg := fmt.Sprintf("Error marshalling json: %v\n", err)
-			err := errors.New(errMsg)
-
 			return nil, err
 		}
 
 		return &threadOutput, nil
-
 	}
 
-	parsedThreads := threads.ParseThreads(threadIds, filteredThreads)
-	threadOutput, err := threads.ThreadsToJson(parsedThreads)
+	threadOutput, err := json.MarshalIndent(*filteredThreads, "", "\t")
 
 	if err != nil {
+		errMsg := fmt.Sprintf("Error marshalling json: %v\n", err)
+		err := errors.New(errMsg)
+
 		return nil, err
 	}
 

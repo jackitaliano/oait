@@ -8,7 +8,7 @@ import (
 	"github.com/akamensky/argparse"
 )
 
-type ThreadsService struct {
+type FilesService struct {
 	name    string
 	desc    string
 	command *argparse.Command
@@ -17,7 +17,7 @@ type ThreadsService struct {
 	delCommand *DelCommand
 }
 
-func NewService(parser *argparse.Parser) *ThreadsService {
+func NewService(parser *argparse.Parser) *FilesService {
 	const name = "files"
 	const desc = "Files Tools"
 
@@ -26,7 +26,7 @@ func NewService(parser *argparse.Parser) *ThreadsService {
 	get := NewGetCommand(service)
 	del := NewDelCommand(service)
 
-	return &ThreadsService{
+	return &FilesService{
 		name,
 		desc,
 		service,
@@ -35,18 +35,18 @@ func NewService(parser *argparse.Parser) *ThreadsService {
 	}
 }
 
-func (t *ThreadsService) Run(key string) error {
+func (f *FilesService) Run(key string) error {
 
-	if t.getCommand.Happened() {
-		err := t.getCommand.Run(key)
+	if f.getCommand.Happened() {
+		err := f.getCommand.Run(key)
 
 		if err != nil {
 			fmt.Printf("ERROR: %v", err.Error())
 			os.Exit(1)
 		}
 
-	} else if t.delCommand.Happened() {
-		err := t.delCommand.Run(key)
+	} else if f.delCommand.Happened() {
+		err := f.delCommand.Run(key)
 
 		if err != nil {
 			fmt.Printf("ERROR: %v", err.Error())
@@ -54,8 +54,8 @@ func (t *ThreadsService) Run(key string) error {
 		}
 
 	} else {
-		errMsg := fmt.Sprintf("No command given to `%v`\n", t.name)
-		helpMsg := t.command.Help(errMsg)
+		errMsg := fmt.Sprintf("No command given to `%v`\n", f.name)
+		helpMsg := f.command.Help(errMsg)
 		err := errors.New(helpMsg)
 		return err
 	}

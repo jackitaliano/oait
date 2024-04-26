@@ -6,9 +6,10 @@ import (
 
 	"github.com/akamensky/argparse"
 
+	"github.com/jackitaliano/oait/cmd/asstsParse"
+	"github.com/jackitaliano/oait/cmd/filesParse"
 	"github.com/jackitaliano/oait/cmd/imagesParse"
 	"github.com/jackitaliano/oait/cmd/threadsParse"
-	"github.com/jackitaliano/oait/cmd/filesParse"
 )
 
 func main() {
@@ -23,6 +24,7 @@ func main() {
 
 	threadsService := threadsParse.NewService(parser)
 	filesService := filesParse.NewService(parser)
+	asstsService := asstsParse.NewService(parser)
 	imagesService := imagesParse.NewService(parser)
 
 	err := parser.Parse(os.Args)
@@ -39,7 +41,8 @@ func main() {
 
 	var threadsCommand *argparse.Command = commands[0]
 	var filesCommand *argparse.Command = commands[1]
-	var imagesCommand *argparse.Command = commands[2]
+	var asstsCommand *argparse.Command = commands[2]
+	var imagesCommand *argparse.Command = commands[3]
 
 	if threadsCommand.Happened() {
 		err := threadsService.Run(*keyArg)
@@ -51,6 +54,14 @@ func main() {
 
 	} else if filesCommand.Happened() {
 		err := filesService.Run(*keyArg)
+
+		if err != nil {
+			fmt.Print(err.Error())
+			os.Exit(1)
+		}
+
+	} else if asstsCommand.Happened() {
+		err := asstsService.Run(*keyArg)
 
 		if err != nil {
 			fmt.Print(err.Error())

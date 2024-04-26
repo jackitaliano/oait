@@ -78,6 +78,7 @@ func (d *DelCommand) Run(key string) error {
 		fileIds, err = d.getFileIds(&args)
 
 		if err != nil {
+			fmt.Printf("X\n")
 			return err
 		}
 		fmt.Printf("✓\n")
@@ -91,22 +92,26 @@ func (d *DelCommand) Run(key string) error {
 	filteredFileObjects, err := d.filterFiles(&args, fileObjects)
 
 	if err != nil {
+		fmt.Printf("X\n")
 		return err
 	}
 	fmt.Printf("✓\n")
 
+	deleteFileIds := getFileIdsFromObjects(filteredFileObjects)
+
 	verify := verifyBeforeDelete()
 
 	if verify {
-		fmt.Printf("Formatting thread output...\t")
+		fmt.Printf("Formatting files output...\t")
 		filesOutput, err := d.getFilesOutput(&args, filteredFileObjects)
 
 		if err != nil {
+			fmt.Printf("X\n")
 			return err
 		}
 		fmt.Printf("✓\n")
 
-		fmt.Printf("Outputting threads... \n\n")
+		fmt.Printf("Outputting files... \n\n")
 		err = d.outputFiles(&args, filesOutput)
 
 		if err != nil {
@@ -117,8 +122,8 @@ func (d *DelCommand) Run(key string) error {
 	confirmed := confirmDelete()
 
 	if confirmed {
-		fmt.Printf("Deleting threads...\t\t")
-		numDeleted := files.DeleteFiles(key, fileIds, *d.orgArg)
+		fmt.Printf("Deleting files...\t\t")
+		numDeleted := files.DeleteFiles(key, deleteFileIds, *d.orgArg)
 		fmt.Printf("✓\n")
 		fmt.Printf("Deleted %v files.\n", numDeleted)
 	} else {

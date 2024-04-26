@@ -6,28 +6,28 @@ import (
 	"github.com/jackitaliano/oait/internal/openai"
 )
 
-func retrieveThread(c chan []openai.Message, key string, threadId string, orgId string) {
+func retrieveThread(c chan *[]openai.Message, key string, threadId string, orgId string) {
 
 	messageResponse, err := openai.GetThreadMessages(key, threadId, orgId)
 
 	if err != nil {
 		fmt.Println(err)
-		c <- nil
+		c <- &[]openai.Message{}
 		return
 	}
 
-	messageData := (*messageResponse).Data
+	messageData := &(*messageResponse).Data
 	c <- messageData
 }
 
 func RetrieveThreads(key string, threadIds []string, orgId string) *[][]openai.Message {
-	c := make(chan []openai.Message, len(threadIds))
+	c := make(chan *[]openai.Message, len(threadIds))
 
 	for _, threadId := range threadIds {
 		go retrieveThread(c, key, threadId, orgId)
 	}
 
-	results := make([][]openai.Message, len(threadIds))
+	results := make([]*[]openai.Message, len(threadIds))
 	for i := range results {
 		results[i] = <-c
 	}
@@ -35,7 +35,7 @@ func RetrieveThreads(key string, threadIds []string, orgId string) *[][]openai.M
 	threads := [][]openai.Message{}
 	for _, thread := range results {
 		if thread != nil {
-			threads = append(threads, thread)
+			threads = append(threads, *thread)
 		}
 	}
 

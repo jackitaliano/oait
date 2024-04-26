@@ -11,9 +11,20 @@ import (
 	"github.com/jackitaliano/oait/internal/request"
 )
 
+type FilePath struct {
+	FileId string `json:"file_id"`
+}
+
+type Annotation struct {
+	Type       string   `json:"type"`
+	FilePath   FilePath `json:"file_path"`
+	Text       string   `json:"text"`
+	StartIndex int      `json:"start_index"`
+}
+
 type MessageText struct {
-	Value       string              `json:"value"`
-	Annotations []map[string]string `json:"annotations"`
+	Value       string       `json:"value"`
+	Annotations []Annotation `json:"annotations"`
 }
 
 type MessageContent struct {

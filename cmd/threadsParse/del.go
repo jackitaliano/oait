@@ -74,6 +74,7 @@ func (d *DelCommand) Run(key string) error {
 	threadIds, err := d.getThreadIds(&args)
 
 	if err != nil {
+		fmt.Printf("X\n")
 		return err
 	}
 
@@ -89,11 +90,14 @@ func (d *DelCommand) Run(key string) error {
 
 	verify := verifyBeforeDelete()
 
+	deleteThreadIds := getThreadIdsFromObjects(filteredThreads)
+
 	if verify {
 		fmt.Printf("Formatting thread output...\t")
 		threadsOutput, err := d.getThreadsOutput(&args, threadIds, filteredThreads)
 
 		if err != nil {
+			fmt.Printf("X\n")
 			return err
 		}
 		fmt.Printf("✓\n")
@@ -102,6 +106,7 @@ func (d *DelCommand) Run(key string) error {
 		err = d.outputThreads(&args, threadsOutput)
 
 		if err != nil {
+			fmt.Printf("X\n")
 			return err
 		}
 	}
@@ -110,7 +115,7 @@ func (d *DelCommand) Run(key string) error {
 
 	if confirmed {
 		fmt.Printf("Deleting threads...\t\t")
-		threads.DeleteThreads(key, threadIds, *d.orgArg)
+		threads.DeleteThreads(key, deleteThreadIds, *d.orgArg)
 		fmt.Printf("✓\n")
 	} else {
 		fmt.Printf("Cancelled.\n")
@@ -236,4 +241,16 @@ func (d *DelCommand) outputThreads(args *[]argparse.Arg, output *[]byte) error {
 	}
 
 	return nil
+}
+
+func getThreadIdsFromObjects(threads *[][]openai.Message) ([]string) {
+	threadIds := []string{}
+
+	for _, fileObject := range *threads {
+		if len(fileObject) > 0 {
+			threadIds = append(threadIds, fileObject[0].Id)
+		}
+	}
+
+	return threadIds
 }
