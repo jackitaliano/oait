@@ -38,7 +38,7 @@ func NewDelCommand(command *argparse.Command) *DelCommand {
 	threadsArg := subCommand.StringList("i", "ids", &argparse.Options{Required: false, Help: "List of Thread IDs"})
 	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "Thread File Input"})
 	sessionArg := subCommand.String("s", "session", &argparse.Options{Required: false, Help: "Retrieve Threads from session-id"})
-	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
+	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization ID"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "Thread File Output"})
 	rawFlag := subCommand.Flag("r", "raw", &argparse.Options{Required: false, Help: "Output raw Threads"})
 	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
@@ -71,7 +71,7 @@ func (d *DelCommand) Run(key string) error {
 	args := d.command.GetArgs()
 
 	fmt.Printf("Retrieving thread ids...\t")
-	threadIds, err := d.getThreadIds(&args)
+	threadIDs, err := d.getThreadIDs(&args)
 
 	if err != nil {
 		fmt.Printf("X\n")
@@ -81,7 +81,7 @@ func (d *DelCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Retrieving threads...\t\t")
-	rawThreads := threads.RetrieveThreads(key, threadIds, *d.orgArg)
+	rawThreads := threads.RetrieveThreads(key, threadIDs, *d.orgArg)
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering threads...\t\t")
@@ -90,11 +90,11 @@ func (d *DelCommand) Run(key string) error {
 
 	verify := verifyBeforeDelete()
 
-	deleteThreadIds := getThreadIdsFromObjects(filteredThreads)
+	deleteThreadIDs := getThreadIDsFromObjects(filteredThreads)
 
 	if verify {
 		fmt.Printf("Formatting thread output...\t")
-		threadsOutput, err := d.getThreadsOutput(&args, threadIds, filteredThreads)
+		threadsOutput, err := d.getThreadsOutput(&args, threadIDs, filteredThreads)
 
 		if err != nil {
 			fmt.Printf("X\n")
@@ -115,7 +115,7 @@ func (d *DelCommand) Run(key string) error {
 
 	if confirmed {
 		fmt.Printf("Deleting threads...\t\t")
-		threads.DeleteThreads(key, deleteThreadIds, *d.orgArg)
+		threads.DeleteThreads(key, deleteThreadIDs, *d.orgArg)
 		fmt.Printf("✓\n")
 	} else {
 		fmt.Printf("Cancelled.\n")
@@ -132,40 +132,40 @@ func confirmDelete() bool {
 	return tui.YesNoLoop("Confirm deletion")
 }
 
-func (d *DelCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
+func (d *DelCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	threadsParsed := (*args)[1].GetParsed()
 	inputParsed := (*args)[2].GetParsed()
 	sessionParsed := (*args)[3].GetParsed()
 
 	if threadsParsed { // List passed
-		threadIds, err := threads.ListInput(*d.threadsArg)
+		threadIDs, err := threads.ListInput(*d.threadsArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return threadIds, nil
+		return threadIDs, nil
 
 	}
 
 	if inputParsed { // File input passed
-		threadIds, err := threads.FileInput(*d.inputArg)
+		threadIDs, err := threads.FileInput(*d.inputArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return threadIds, nil
+		return threadIDs, nil
 	}
 
 	if sessionParsed {
-		threadIds, err := threads.SessionInput(*d.sessionArg, *d.orgArg)
+		threadIDs, err := threads.SessionInput(*d.sessionArg, *d.orgArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return threadIds, nil
+		return threadIDs, nil
 
 	}
 
@@ -199,7 +199,7 @@ func (d *DelCommand) filterThreads(args *[]argparse.Arg, rawThreads *[][]openai.
 	return rawThreads
 }
 
-func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIds []string, filteredThreads *[][]openai.Message) (*[]byte, error) {
+func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, filteredThreads *[][]openai.Message) (*[]byte, error) {
 	rawParsed := (*args)[6].GetParsed()
 
 	if rawParsed && *(d.rawFlag) {
@@ -216,7 +216,7 @@ func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIds []string, 
 
 	}
 
-	parsedThreads := threads.ParseThreads(threadIds, filteredThreads)
+	parsedThreads := threads.ParseThreads(threadIDs, filteredThreads)
 	threadOutput, err := threads.ThreadsToJson(parsedThreads)
 
 	if err != nil {
@@ -243,14 +243,14 @@ func (d *DelCommand) outputThreads(args *[]argparse.Arg, output *[]byte) error {
 	return nil
 }
 
-func getThreadIdsFromObjects(threads *[][]openai.Message) []string {
-	threadIds := []string{}
+func getThreadIDsFromObjects(threads *[][]openai.Message) []string {
+	threadIDs := []string{}
 
 	for _, fileObject := range *threads {
 		if len(fileObject) > 0 {
-			threadIds = append(threadIds, fileObject[0].Id)
+			threadIDs = append(threadIDs, fileObject[0].ID)
 		}
 	}
 
-	return threadIds
+	return threadIDs
 }

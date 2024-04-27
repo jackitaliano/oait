@@ -6,9 +6,9 @@ import (
 	"github.com/jackitaliano/oait/internal/openai"
 )
 
-func deleteFile(c chan *openai.FileDeleteResponse, key string, fileId string, orgId string) {
+func deleteFile(c chan *openai.FileDeleteResponse, key string, fileID string, orgID string) {
 
-	deleteResponse, err := openai.DeleteFile(key, fileId, orgId)
+	deleteResponse, err := openai.DeleteFile(key, fileID, orgID)
 
 	if err != nil {
 		fmt.Println(err)
@@ -19,14 +19,14 @@ func deleteFile(c chan *openai.FileDeleteResponse, key string, fileId string, or
 	c <- deleteResponse
 }
 
-func DeleteFiles(key string, fileIds []string, orgId string) int {
-	c := make(chan *openai.FileDeleteResponse, len(fileIds))
+func DeleteFiles(key string, fileIDs []string, orgID string) int {
+	c := make(chan *openai.FileDeleteResponse, len(fileIDs))
 
-	for _, threadId := range fileIds {
-		go deleteFile(c, key, threadId, orgId)
+	for _, threadID := range fileIDs {
+		go deleteFile(c, key, threadID, orgID)
 	}
 
-	results := make([]*openai.FileDeleteResponse, len(fileIds))
+	results := make([]*openai.FileDeleteResponse, len(fileIDs))
 	numDeleted := 0
 
 	for i := range results {

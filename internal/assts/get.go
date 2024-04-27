@@ -6,9 +6,9 @@ import (
 	"github.com/jackitaliano/oait/internal/openai"
 )
 
-func retrieveAsst(c chan openai.AsstObject, key string, fileId string, orgId string) {
+func retrieveAsst(c chan openai.AsstObject, key string, fileID string, orgID string) {
 
-	asstObject, err := openai.GetAsstObject(key, fileId, orgId)
+	asstObject, err := openai.GetAsstObject(key, fileID, orgID)
 
 	if err != nil {
 		fmt.Println(err)
@@ -19,14 +19,14 @@ func retrieveAsst(c chan openai.AsstObject, key string, fileId string, orgId str
 	c <- *asstObject
 }
 
-func RetrieveAssts(key string, threadIds []string, orgId string) *[]openai.AsstObject {
-	c := make(chan openai.AsstObject, len(threadIds))
+func RetrieveAssts(key string, threadIDs []string, orgID string) *[]openai.AsstObject {
+	c := make(chan openai.AsstObject, len(threadIDs))
 
-	for _, threadId := range threadIds {
-		go retrieveAsst(c, key, threadId, orgId)
+	for _, threadID := range threadIDs {
+		go retrieveAsst(c, key, threadID, orgID)
 	}
 
-	files := make([]openai.AsstObject, len(threadIds))
+	files := make([]openai.AsstObject, len(threadIDs))
 	for i := range files {
 		files[i] = <-c
 	}
@@ -34,8 +34,8 @@ func RetrieveAssts(key string, threadIds []string, orgId string) *[]openai.AsstO
 	return &files
 }
 
-func RetrieveAllAssts(key string, orgId string) (*[]openai.AsstObject, error) {
-	files, err := openai.GetAllAsstObjects(key, orgId)
+func RetrieveAllAssts(key string, orgID string) (*[]openai.AsstObject, error) {
+	files, err := openai.GetAllAsstObjects(key, orgID)
 
 	if err != nil {
 		return nil, err

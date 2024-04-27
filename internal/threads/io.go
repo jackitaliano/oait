@@ -8,8 +8,8 @@ import (
 	"github.com/jackitaliano/oait/internal/openai"
 )
 
-func SingleInput(threadId string) (string, error) {
-	trimmedString := strings.Trim(threadId, " ")
+func SingleInput(threadID string) (string, error) {
+	trimmedString := strings.Trim(threadID, " ")
 
 	if trimmedString == "" {
 		errMsg := "Invalid thread id passed ' '"
@@ -20,18 +20,18 @@ func SingleInput(threadId string) (string, error) {
 	return trimmedString, nil
 }
 
-func ListInput(threadIds []string) ([]string, error) {
-	var allThreadIds []string
+func ListInput(threadIDs []string) ([]string, error) {
+	var allThreadIDs []string
 
-	for _, idsStr := range threadIds {
-		ids := splitIds(idsStr, " ")
+	for _, idsStr := range threadIDs {
+		ids := splitIDs(idsStr, " ")
 
 		for _, id := range ids {
-			allThreadIds = append(allThreadIds, id)
+			allThreadIDs = append(allThreadIDs, id)
 		}
 	}
 
-	return allThreadIds, nil
+	return allThreadIDs, nil
 }
 
 func FileInput(fileName string) ([]string, error) {
@@ -54,22 +54,22 @@ func FileInput(fileName string) ([]string, error) {
 
 }
 
-func SessionInput(sessionId string, orgId string) ([]string, error) {
-	sessionThreadsRes, err := openai.GetSessionThreads(sessionId, orgId)
+func SessionInput(sessionID string, orgID string) ([]string, error) {
+	sessionThreadsRes, err := openai.GetSessionThreads(sessionID, orgID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	threadIds := make([]string, len(sessionThreadsRes.Data))
+	threadIDs := make([]string, len(sessionThreadsRes.Data))
 
 	for i, thread := range (*sessionThreadsRes).Data {
-		id := thread.Id
+		id := thread.ID
 
-		threadIds[i] = id
+		threadIDs[i] = id
 	}
 
-	return threadIds, nil
+	return threadIDs, nil
 }
 
 func FileOutput(fileName string, data *[]byte) error {
@@ -92,19 +92,19 @@ func txtInput(fileName string) ([]string, error) {
 	}
 
 	stringData := string(data)
-	splitStrings := splitIds(stringData, "\n")
+	splitStrings := splitIDs(stringData, "\n")
 
-	var threadIds []string
+	var threadIDs []string
 	for _, val := range splitStrings {
 		if val != "" {
-			threadIds = append(threadIds, val)
+			threadIDs = append(threadIDs, val)
 		}
 	}
 
-	return threadIds, nil
+	return threadIDs, nil
 }
 
-func splitIds(str string, delimeter string) []string {
+func splitIDs(str string, delimeter string) []string {
 	trimmedString := strings.Trim(str, " ")
 	splitString := strings.Split(trimmedString, delimeter)
 

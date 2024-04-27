@@ -35,7 +35,7 @@ func NewDelCommand(command *argparse.Command) *DelCommand {
 	filesArg := subCommand.StringList("i", "ids", &argparse.Options{Required: false, Help: "List of File IDs"})
 	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "File File Input"})
 	allFlag := subCommand.Flag("A", "all", &argparse.Options{Required: false, Help: "Get all files"})
-	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
+	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization ID"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "File File Output"})
 	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
 	timeGTArg := subCommand.Float("D", "Days", &argparse.Options{Required: false, Help: "Filter by GT days"})
@@ -63,19 +63,19 @@ func (d *DelCommand) Run(key string) error {
 	allParsed := args[3].GetParsed()
 
 	var fileObjects *[]openai.FileObject
-	var fileIds []string
+	var fileIDs []string
 	var err error
 
 	if allParsed && *d.allFlag {
 		fmt.Printf("Retrieving all files...\t\t")
 		fileObjects = files.RetrieveAllFiles(key, *d.orgArg)
-		fileIds = getFileIdsFromObjects(fileObjects)
+		fileIDs = getFileIDsFromObjects(fileObjects)
 		fmt.Printf("✓\n")
 
 	} else {
 
 		fmt.Printf("Retrieving file ids...\t")
-		fileIds, err = d.getFileIds(&args)
+		fileIDs, err = d.getFileIDs(&args)
 
 		if err != nil {
 			fmt.Printf("X\n")
@@ -84,7 +84,7 @@ func (d *DelCommand) Run(key string) error {
 		fmt.Printf("✓\n")
 
 		fmt.Printf("Retrieving files...\t\t")
-		fileObjects = files.RetrieveFiles(key, fileIds, *d.orgArg)
+		fileObjects = files.RetrieveFiles(key, fileIDs, *d.orgArg)
 		fmt.Printf("✓\n")
 	}
 
@@ -97,7 +97,7 @@ func (d *DelCommand) Run(key string) error {
 	}
 	fmt.Printf("✓\n")
 
-	deleteFileIds := getFileIdsFromObjects(filteredFileObjects)
+	deleteFileIDs := getFileIDsFromObjects(filteredFileObjects)
 
 	verify := verifyBeforeDelete()
 
@@ -123,7 +123,7 @@ func (d *DelCommand) Run(key string) error {
 
 	if confirmed {
 		fmt.Printf("Deleting files...\t\t")
-		numDeleted := files.DeleteFiles(key, deleteFileIds, *d.orgArg)
+		numDeleted := files.DeleteFiles(key, deleteFileIDs, *d.orgArg)
 		fmt.Printf("✓\n")
 		fmt.Printf("Deleted %v files.\n", numDeleted)
 	} else {
@@ -141,29 +141,29 @@ func confirmDelete() bool {
 	return tui.YesNoLoop("Confirm deletion")
 }
 
-func (d *DelCommand) getFileIds(args *[]argparse.Arg) ([]string, error) {
+func (d *DelCommand) getFileIDs(args *[]argparse.Arg) ([]string, error) {
 	filesParsed := (*args)[1].GetParsed()
 	inputParsed := (*args)[2].GetParsed()
 
 	if filesParsed { // List passed
-		fileIds, err := files.ListInput(*d.filesArg)
+		fileIDs, err := files.ListInput(*d.filesArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return fileIds, nil
+		return fileIDs, nil
 
 	}
 
 	if inputParsed { // File input passed
-		fileIds, err := files.FileInput(*d.inputArg)
+		fileIDs, err := files.FileInput(*d.inputArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return fileIds, nil
+		return fileIDs, nil
 	}
 
 	errMsg := fmt.Sprintf("No input options passed to `%v`\n", d.name)
@@ -229,12 +229,12 @@ func (d *DelCommand) outputFiles(args *[]argparse.Arg, output *[]byte) error {
 	return nil
 }
 
-func getFileIdsFromObjects(fileObjects *[]openai.FileObject) []string {
-	fileIds := make([]string, len(*fileObjects))
+func getFileIDsFromObjects(fileObjects *[]openai.FileObject) []string {
+	fileIDs := make([]string, len(*fileObjects))
 
 	for i, fileObject := range *fileObjects {
-		fileIds[i] = fileObject.Id
+		fileIDs[i] = fileObject.ID
 	}
 
-	return fileIds
+	return fileIDs
 }

@@ -34,7 +34,7 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 	asstsArg := subCommand.StringList("i", "ids", &argparse.Options{Required: false, Help: "List of Asst IDs"})
 	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "Asst Asst Input"})
 	allFlag := subCommand.Flag("A", "all", &argparse.Options{Required: false, Help: "Get all assts"})
-	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
+	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization ID"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "Asst File Output"})
 	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
 	timeGTArg := subCommand.Float("D", "Days", &argparse.Options{Required: false, Help: "Filter by GT days"})
@@ -78,7 +78,7 @@ func (g *GetCommand) Run(key string) error {
 	} else {
 
 		fmt.Printf("Retrieving asst ids...\t")
-		asstIds, err := g.getAsstIds(&args)
+		asstIDs, err := g.getAsstIDs(&args)
 
 		if err != nil {
 			fmt.Printf("X\n")
@@ -87,7 +87,7 @@ func (g *GetCommand) Run(key string) error {
 		fmt.Printf("✓\n")
 
 		fmt.Printf("Retrieving assts...\t\t")
-		asstObjects = assts.RetrieveAssts(key, asstIds, *g.orgArg)
+		asstObjects = assts.RetrieveAssts(key, asstIDs, *g.orgArg)
 		fmt.Printf("✓\n")
 	}
 
@@ -119,29 +119,29 @@ func (g *GetCommand) Run(key string) error {
 	return nil
 }
 
-func (g *GetCommand) getAsstIds(args *[]argparse.Arg) ([]string, error) {
+func (g *GetCommand) getAsstIDs(args *[]argparse.Arg) ([]string, error) {
 	asstsParsed := (*args)[1].GetParsed()
 	inputParsed := (*args)[2].GetParsed()
 
 	if asstsParsed { // List passed
-		asstIds, err := assts.ListInput(*g.asstsArg)
+		asstIDs, err := assts.ListInput(*g.asstsArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return asstIds, nil
+		return asstIDs, nil
 
 	}
 
 	if inputParsed { // Asst input passed
-		asstIds, err := assts.FileInput(*g.inputArg)
+		asstIDs, err := assts.FileInput(*g.inputArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return asstIds, nil
+		return asstIDs, nil
 	}
 
 	errMsg := fmt.Sprintf("No input options passed to `%v`\n", g.name)

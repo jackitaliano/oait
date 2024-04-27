@@ -6,9 +6,9 @@ import (
 	"github.com/jackitaliano/oait/internal/openai"
 )
 
-func retrieveFile(c chan openai.FileObject, key string, fileId string, orgId string) {
+func retrieveFile(c chan openai.FileObject, key string, fileID string, orgID string) {
 
-	fileObject, err := openai.GetFileObject(key, fileId, orgId)
+	fileObject, err := openai.GetFileObject(key, fileID, orgID)
 
 	if err != nil {
 		fmt.Println(err)
@@ -19,14 +19,14 @@ func retrieveFile(c chan openai.FileObject, key string, fileId string, orgId str
 	c <- *fileObject
 }
 
-func RetrieveFiles(key string, threadIds []string, orgId string) *[]openai.FileObject {
-	c := make(chan openai.FileObject, len(threadIds))
+func RetrieveFiles(key string, threadIDs []string, orgID string) *[]openai.FileObject {
+	c := make(chan openai.FileObject, len(threadIDs))
 
-	for _, threadId := range threadIds {
-		go retrieveFile(c, key, threadId, orgId)
+	for _, threadID := range threadIDs {
+		go retrieveFile(c, key, threadID, orgID)
 	}
 
-	files := make([]openai.FileObject, len(threadIds))
+	files := make([]openai.FileObject, len(threadIDs))
 	for i := range files {
 		files[i] = <-c
 	}
@@ -34,8 +34,8 @@ func RetrieveFiles(key string, threadIds []string, orgId string) *[]openai.FileO
 	return &files
 }
 
-func RetrieveAllFiles(key string, orgId string) *[]openai.FileObject {
-	files, err := openai.GetAllFileObjects(key, orgId)
+func RetrieveAllFiles(key string, orgID string) *[]openai.FileObject {
+	files, err := openai.GetAllFileObjects(key, orgID)
 
 	if err != nil {
 		return nil

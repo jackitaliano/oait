@@ -37,7 +37,7 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 	threadsArg := subCommand.StringList("i", "ids", &argparse.Options{Required: false, Help: "List of Thread IDs"})
 	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "Thread File Input"})
 	sessionArg := subCommand.String("s", "session", &argparse.Options{Required: false, Help: "Retrieve Threads from session-id"})
-	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
+	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization ID"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "Thread File Output"})
 	prettyFlag := subCommand.Flag("p", "pretty", &argparse.Options{Required: false, Help: "Pretty print threads"})
 	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
@@ -71,7 +71,7 @@ func (g *GetCommand) Run(key string) error {
 	args := g.command.GetArgs()
 
 	fmt.Printf("Retrieving thread ids...\t")
-	threadIds, err := g.getThreadIds(&args)
+	threadIDs, err := g.getThreadIDs(&args)
 
 	if err != nil {
 		fmt.Printf("X\n")
@@ -81,7 +81,7 @@ func (g *GetCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Retrieving threads...\t\t")
-	rawThreads := threads.RetrieveThreads(key, threadIds, *g.orgArg)
+	rawThreads := threads.RetrieveThreads(key, threadIDs, *g.orgArg)
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering threads...\t\t")
@@ -89,7 +89,7 @@ func (g *GetCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Formatting thread output...\t")
-	threadsOutput, err := g.getThreadsOutput(&args, threadIds, filteredThreads)
+	threadsOutput, err := g.getThreadsOutput(&args, threadIDs, filteredThreads)
 
 	if err != nil {
 		fmt.Printf("X\n")
@@ -107,40 +107,40 @@ func (g *GetCommand) Run(key string) error {
 	return nil
 }
 
-func (g *GetCommand) getThreadIds(args *[]argparse.Arg) ([]string, error) {
+func (g *GetCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	threadsParsed := (*args)[1].GetParsed()
 	inputParsed := (*args)[2].GetParsed()
 	sessionParsed := (*args)[3].GetParsed()
 
 	if threadsParsed { // List passed
-		threadIds, err := threads.ListInput(*g.threadsArg)
+		threadIDs, err := threads.ListInput(*g.threadsArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return threadIds, nil
+		return threadIDs, nil
 
 	}
 
 	if inputParsed { // File input passed
-		threadIds, err := threads.FileInput(*g.inputArg)
+		threadIDs, err := threads.FileInput(*g.inputArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return threadIds, nil
+		return threadIDs, nil
 	}
 
 	if sessionParsed {
-		threadIds, err := threads.SessionInput(*g.sessionArg, *g.orgArg)
+		threadIDs, err := threads.SessionInput(*g.sessionArg, *g.orgArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return threadIds, nil
+		return threadIDs, nil
 
 	}
 
@@ -174,11 +174,11 @@ func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[][]openai.
 	return rawThreads
 }
 
-func (g *GetCommand) getThreadsOutput(args *[]argparse.Arg, threadIds []string, filteredThreads *[][]openai.Message) (*[]byte, error) {
+func (g *GetCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, filteredThreads *[][]openai.Message) (*[]byte, error) {
 	prettyParsed := (*args)[6].GetParsed()
 
 	if prettyParsed && *(g.prettyFlag) {
-		parsedThreads := threads.ParseThreads(threadIds, filteredThreads)
+		parsedThreads := threads.ParseThreads(threadIDs, filteredThreads)
 		threadOutput, err := threads.ThreadsToJson(parsedThreads)
 
 		if err != nil {

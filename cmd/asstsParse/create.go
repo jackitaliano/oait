@@ -42,7 +42,7 @@ func NewCreateCommand(command *argparse.Command) *CreateCommand {
 	topP := subCommand.Float("T", "topp", &argparse.Options{Required: false, Help: "Top P of assistant <0.0 - 1.0>", Default: 1.0})
 	resForm := subCommand.String("r", "resformat", &argparse.Options{Required: false, Help: "Response format of assistant <'json_object' | 'auto'>", Default: "auto"})
 	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "Asst File Input"})
-	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
+	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization ID"})
 
 	return &CreateCommand{
 		name,

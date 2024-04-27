@@ -10,7 +10,7 @@ import (
 )
 
 type FileObject struct {
-	Id        string `json:"id"`
+	ID        string `json:"id"`
 	Object    string `json:"object"`
 	Bytes     int    `json:"bytes"`
 	CreatedAt int    `json:"created_at"`
@@ -24,13 +24,13 @@ type FileObjectsResponse struct {
 }
 
 type FileDeleteResponse struct {
-	Id      string `json:"id"`
+	ID      string `json:"id"`
 	Object  string `json:"object"`
 	Deleted bool   `json:"deleted"`
 }
 
-func GetFileObject(key string, fileId string, orgId string) (*FileObject, error) {
-	url := fmt.Sprintf("https://api.openai.com/v1/files/%v", fileId)
+func GetFileObject(key string, fileID string, orgID string) (*FileObject, error) {
+	url := fmt.Sprintf("https://api.openai.com/v1/files/%v", fileID)
 
 	method := "GET"
 	var reqBody io.Reader = nil
@@ -46,8 +46,8 @@ func GetFileObject(key string, fileId string, orgId string) (*FileObject, error)
 	req.Header.Set("Authorization", "Bearer "+key)
 	req.Header.Set("Content-Type", "application/json")
 
-	if orgId != "" {
-		req.Header.Set("Openai-Organization", orgId)
+	if orgID != "" {
+		req.Header.Set("Openai-Organization", orgID)
 	}
 
 	resBody, err := request.Process[FileObject](req)
@@ -59,7 +59,7 @@ func GetFileObject(key string, fileId string, orgId string) (*FileObject, error)
 	return resBody, nil
 }
 
-func GetAllFileObjects(key string, orgId string) (*FileObjectsResponse, error) {
+func GetAllFileObjects(key string, orgID string) (*FileObjectsResponse, error) {
 	var url string
 
 	url = "https://api.openai.com/v1/files"
@@ -78,8 +78,8 @@ func GetAllFileObjects(key string, orgId string) (*FileObjectsResponse, error) {
 	req.Header.Set("Authorization", "Bearer "+key)
 	req.Header.Set("Content-Type", "application/json")
 
-	if orgId != "" {
-		req.Header.Set("Openai-Organization", orgId)
+	if orgID != "" {
+		req.Header.Set("Openai-Organization", orgID)
 	}
 
 	resBody, err := request.Process[FileObjectsResponse](req)
@@ -91,8 +91,8 @@ func GetAllFileObjects(key string, orgId string) (*FileObjectsResponse, error) {
 	return resBody, nil
 }
 
-func DeleteFile(key string, fileId string, orgId string) (*FileDeleteResponse, error) {
-	url := fmt.Sprintf("https://api.openai.com/v1/files/%v", fileId)
+func DeleteFile(key string, fileID string, orgID string) (*FileDeleteResponse, error) {
+	url := fmt.Sprintf("https://api.openai.com/v1/files/%v", fileID)
 
 	method := "DELETE"
 	var reqBody io.Reader = nil
@@ -108,8 +108,8 @@ func DeleteFile(key string, fileId string, orgId string) (*FileDeleteResponse, e
 	req.Header.Set("Authorization", "Bearer "+key)
 	req.Header.Set("Content-Type", "application/json")
 
-	if orgId != "" {
-		req.Header.Set("Openai-Organization", orgId)
+	if orgID != "" {
+		req.Header.Set("Openai-Organization", orgID)
 	}
 
 	resBody, err := request.Process[FileDeleteResponse](req)

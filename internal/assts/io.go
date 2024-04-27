@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-func SingleInput(asstId string) (string, error) {
-	trimmedString := strings.Trim(asstId, " ")
+func SingleInput(asstID string) (string, error) {
+	trimmedString := strings.Trim(asstID, " ")
 
 	if trimmedString == "" {
 		errMsg := "Invalid file id passed ' '"
@@ -20,18 +20,18 @@ func SingleInput(asstId string) (string, error) {
 	return trimmedString, nil
 }
 
-func ListInput(asstIds []string) ([]string, error) {
-	var allFileIds []string
+func ListInput(asstIDs []string) ([]string, error) {
+	var allFileIDs []string
 
-	for _, idsStr := range asstIds {
-		ids := splitIds(idsStr, " ")
+	for _, idsStr := range asstIDs {
+		ids := splitIDs(idsStr, " ")
 
 		for _, id := range ids {
-			allFileIds = append(allFileIds, id)
+			allFileIDs = append(allFileIDs, id)
 		}
 	}
 
-	return allFileIds, nil
+	return allFileIDs, nil
 }
 
 func FileInput(fileName string) ([]string, error) {
@@ -98,19 +98,19 @@ func txtInput(fileName string) ([]string, error) {
 	}
 
 	stringData := string(data)
-	splitStrings := splitIds(stringData, "\n")
+	splitStrings := splitIDs(stringData, "\n")
 
-	var asstIds []string
+	var asstIDs []string
 	for _, val := range splitStrings {
 		if val != "" {
-			asstIds = append(asstIds, val)
+			asstIDs = append(asstIDs, val)
 		}
 	}
 
-	return asstIds, nil
+	return asstIDs, nil
 }
 
-func splitIds(str string, delimeter string) []string {
+func splitIDs(str string, delimeter string) []string {
 	trimmedString := strings.Trim(str, " ")
 	splitString := strings.Split(trimmedString, delimeter)
 

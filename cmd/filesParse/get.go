@@ -34,7 +34,7 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 	filesArg := subCommand.StringList("i", "ids", &argparse.Options{Required: false, Help: "List of File IDs"})
 	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "File File Input"})
 	allFlag := subCommand.Flag("A", "all", &argparse.Options{Required: false, Help: "Get all files"})
-	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
+	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization ID"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "File File Output"})
 	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
 	timeGTArg := subCommand.Float("D", "Days", &argparse.Options{Required: false, Help: "Filter by GT days"})
@@ -72,7 +72,7 @@ func (g *GetCommand) Run(key string) error {
 	} else {
 
 		fmt.Printf("Retrieving file ids...\t")
-		fileIds, err := g.getFileIds(&args)
+		fileIDs, err := g.getFileIDs(&args)
 
 		if err != nil {
 			fmt.Printf("X\n")
@@ -81,7 +81,7 @@ func (g *GetCommand) Run(key string) error {
 		fmt.Printf("✓\n")
 
 		fmt.Printf("Retrieving files...\t\t")
-		fileObjects = files.RetrieveFiles(key, fileIds, *g.orgArg)
+		fileObjects = files.RetrieveFiles(key, fileIDs, *g.orgArg)
 		fmt.Printf("✓\n")
 	}
 
@@ -113,29 +113,29 @@ func (g *GetCommand) Run(key string) error {
 	return nil
 }
 
-func (g *GetCommand) getFileIds(args *[]argparse.Arg) ([]string, error) {
+func (g *GetCommand) getFileIDs(args *[]argparse.Arg) ([]string, error) {
 	filesParsed := (*args)[1].GetParsed()
 	inputParsed := (*args)[2].GetParsed()
 
 	if filesParsed { // List passed
-		fileIds, err := files.ListInput(*g.filesArg)
+		fileIDs, err := files.ListInput(*g.filesArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return fileIds, nil
+		return fileIDs, nil
 
 	}
 
 	if inputParsed { // File input passed
-		fileIds, err := files.FileInput(*g.inputArg)
+		fileIDs, err := files.FileInput(*g.inputArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return fileIds, nil
+		return fileIDs, nil
 	}
 
 	errMsg := fmt.Sprintf("No input options passed to `%v`\n", g.name)

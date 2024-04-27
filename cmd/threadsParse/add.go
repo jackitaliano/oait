@@ -29,9 +29,9 @@ func NewAddCommand(command *argparse.Command) *AddCommand {
 
 	subCommand := command.NewCommand(name, desc)
 
-	threadArg := subCommand.String("i", "ids", &argparse.Options{Required: true, Help: "Thread Id to add message to"})
+	threadArg := subCommand.String("i", "ids", &argparse.Options{Required: true, Help: "Thread ID to add message to"})
 	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "Thread File Input"})
-	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
+	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization ID"})
 	messageArg := subCommand.String("m", "msg", &argparse.Options{Required: false, Help: "Message text to add"})
 	roleArg := subCommand.String("r", "role", &argparse.Options{Required: false, Help: "Message role to add", Default: "user"})
 
@@ -54,13 +54,13 @@ func (a *AddCommand) Happened() bool {
 func (a *AddCommand) Run(key string) error {
 	args := a.command.GetArgs()
 
-	threadId, err := a.getThreadId(&args)
+	threadID, err := a.getThreadID(&args)
 
 	if err != nil {
 		return err
 	}
 
-	message, err := a.createMessage(&args, *threadId)
+	message, err := a.createMessage(&args, *threadID)
 
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func (a *AddCommand) Run(key string) error {
 
 	if confirmed {
 		fmt.Printf("Adding message...\t\t")
-		threads.AddMessage(key, *threadId, message, *a.orgArg)
+		threads.AddMessage(key, *threadID, message, *a.orgArg)
 		fmt.Printf("✓\n")
 	} else {
 		fmt.Printf("Canceled.\n")
@@ -99,17 +99,17 @@ func confirmAdd() bool {
 	return tui.YesNoLoop("Confirm addition")
 }
 
-func (a *AddCommand) getThreadId(args *[]argparse.Arg) (*string, error) {
+func (a *AddCommand) getThreadID(args *[]argparse.Arg) (*string, error) {
 	threadParsed := (*args)[1].GetParsed()
 
 	if threadParsed { // List passed
-		threadId, err := threads.SingleInput(*a.threadArg)
+		threadID, err := threads.SingleInput(*a.threadArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return &threadId, nil
+		return &threadID, nil
 	}
 
 	errMsg := fmt.Sprintf("No input options passed to `%v`\n", a.name)
@@ -118,7 +118,7 @@ func (a *AddCommand) getThreadId(args *[]argparse.Arg) (*string, error) {
 	return nil, err
 }
 
-func (a *AddCommand) createMessage(args *[]argparse.Arg, threadId string) (*openai.CreatedMessage, error) {
+func (a *AddCommand) createMessage(args *[]argparse.Arg, threadID string) (*openai.CreatedMessage, error) {
 	messageParsed := (*args)[4].GetParsed()
 
 	if messageParsed {

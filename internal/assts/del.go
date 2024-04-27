@@ -6,9 +6,9 @@ import (
 	"github.com/jackitaliano/oait/internal/openai"
 )
 
-func deleteAsst(c chan *openai.AsstDeleteResponse, key string, asstId string, orgId string) {
+func deleteAsst(c chan *openai.AsstDeleteResponse, key string, asstID string, orgID string) {
 
-	deleteResponse, err := openai.DeleteAsst(key, asstId, orgId)
+	deleteResponse, err := openai.DeleteAsst(key, asstID, orgID)
 
 	if err != nil {
 		fmt.Println(err)
@@ -19,14 +19,14 @@ func deleteAsst(c chan *openai.AsstDeleteResponse, key string, asstId string, or
 	c <- deleteResponse
 }
 
-func DeleteAssts(key string, fileIds []string, orgId string) int {
-	c := make(chan *openai.AsstDeleteResponse, len(fileIds))
+func DeleteAssts(key string, fileIDs []string, orgID string) int {
+	c := make(chan *openai.AsstDeleteResponse, len(fileIDs))
 
-	for _, threadId := range fileIds {
-		go deleteAsst(c, key, threadId, orgId)
+	for _, threadID := range fileIDs {
+		go deleteAsst(c, key, threadID, orgID)
 	}
 
-	results := make([]*openai.AsstDeleteResponse, len(fileIds))
+	results := make([]*openai.AsstDeleteResponse, len(fileIDs))
 	numDeleted := 0
 
 	for i := range results {

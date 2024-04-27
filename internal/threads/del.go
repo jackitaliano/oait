@@ -6,9 +6,9 @@ import (
 	"github.com/jackitaliano/oait/internal/openai"
 )
 
-func deleteThread(c chan *openai.ThreadDeleteResponse, key string, threadId string, orgId string) {
+func deleteThread(c chan *openai.ThreadDeleteResponse, key string, threadID string, orgID string) {
 
-	deleteResponse, err := openai.DeleteThread(key, threadId, orgId)
+	deleteResponse, err := openai.DeleteThread(key, threadID, orgID)
 
 	if err != nil {
 		fmt.Println(err)
@@ -19,14 +19,14 @@ func deleteThread(c chan *openai.ThreadDeleteResponse, key string, threadId stri
 	c <- deleteResponse
 }
 
-func DeleteThreads(key string, threadIds []string, orgId string) int {
-	c := make(chan *openai.ThreadDeleteResponse, len(threadIds))
+func DeleteThreads(key string, threadIDs []string, orgID string) int {
+	c := make(chan *openai.ThreadDeleteResponse, len(threadIDs))
 
-	for _, threadId := range threadIds {
-		go deleteThread(c, key, threadId, orgId)
+	for _, threadID := range threadIDs {
+		go deleteThread(c, key, threadID, orgID)
 	}
 
-	results := make([]*openai.ThreadDeleteResponse, len(threadIds))
+	results := make([]*openai.ThreadDeleteResponse, len(threadIDs))
 	numDeleted := 0
 
 	for i := range results {

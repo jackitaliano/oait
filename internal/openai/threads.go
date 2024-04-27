@@ -12,7 +12,7 @@ import (
 )
 
 type FilePath struct {
-	FileId string `json:"file_id"`
+	FileID string `json:"file_id"`
 }
 
 type Annotation struct {
@@ -33,12 +33,12 @@ type MessageContent struct {
 }
 
 type Message struct {
-	Id          string           `json:"id"`
+	ID          string           `json:"id"`
 	Object      string           `json:"object"`
 	CreatedAt   int              `json:"created_at"`
-	AssistantId string           `json:"assistant_id"`
-	ThreadId    string           `json:"thread_id"`
-	RunId       string           `json:"run_id"`
+	AssistantID string           `json:"assistant_id"`
+	ThreadID    string           `json:"thread_id"`
+	RunID       string           `json:"run_id"`
 	Role        string           `json:"role"`
 	Content     []MessageContent `json:"content"`
 }
@@ -50,21 +50,21 @@ type MessagesResponse struct {
 
 type Thread struct {
 	Object    string `json:"object"`
-	Id        string `json:"id"`
+	ID        string `json:"id"`
 	CreatedAt int    `json:"created_at"`
 }
 
 type SessionThreadsResponse struct {
 	Object  string   `json:"object"`
 	Data    []Thread `json:"data"`
-	FirstId string   `json:"first_id"`
-	LastId  string   `json:"last_id"`
+	FirstID string   `json:"first_id"`
+	LastID  string   `json:"last_id"`
 	HasMore bool     `json:"has_more"`
 }
 
 type ThreadDeleteResponse struct {
 	Object  string `json:"object"`
-	Id      string `json:"id"`
+	ID      string `json:"id"`
 	Deleted bool   `json:"deleted"`
 }
 
@@ -73,8 +73,8 @@ type CreatedMessage struct {
 	Content string `json:"content"`
 }
 
-func GetThreadMessages(key string, threadId string, orgId string) (*MessagesResponse, error) {
-	url := fmt.Sprintf("https://api.openai.com/v1/threads/%v/messages?limit=100", threadId)
+func GetThreadMessages(key string, threadID string, orgID string) (*MessagesResponse, error) {
+	url := fmt.Sprintf("https://api.openai.com/v1/threads/%v/messages?limit=100", threadID)
 	method := "GET"
 	var reqBody io.Reader = nil
 
@@ -90,8 +90,8 @@ func GetThreadMessages(key string, threadId string, orgId string) (*MessagesResp
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("OpenAI-Beta", "assistants=v2")
 
-	if orgId != "" {
-		req.Header.Set("Openai-Organization", orgId)
+	if orgID != "" {
+		req.Header.Set("Openai-Organization", orgID)
 	}
 
 	resBody, err := request.Process[MessagesResponse](req)
@@ -103,7 +103,7 @@ func GetThreadMessages(key string, threadId string, orgId string) (*MessagesResp
 	return resBody, nil
 }
 
-func GetSessionThreads(sessionId string, orgId string) (*SessionThreadsResponse, error) {
+func GetSessionThreads(sessionID string, orgID string) (*SessionThreadsResponse, error) {
 	url := fmt.Sprintf("https://api.openai.com/v1/threads?limit=100")
 	method := "GET"
 	var reqBody io.Reader = nil
@@ -116,12 +116,12 @@ func GetSessionThreads(sessionId string, orgId string) (*SessionThreadsResponse,
 		return nil, err
 	}
 
-	req.Header.Set("Authorization", "Bearer "+sessionId)
+	req.Header.Set("Authorization", "Bearer "+sessionID)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Openai-Beta", "assistants=v1")
 
-	if orgId != "" {
-		req.Header.Set("Openai-Organization", orgId)
+	if orgID != "" {
+		req.Header.Set("Openai-Organization", orgID)
 	}
 
 	resBody, err := request.Process[SessionThreadsResponse](req)
@@ -133,8 +133,8 @@ func GetSessionThreads(sessionId string, orgId string) (*SessionThreadsResponse,
 	return resBody, nil
 }
 
-func DeleteThread(key string, threadId string, orgId string) (*ThreadDeleteResponse, error) {
-	url := fmt.Sprintf("https://api.openai.com/v1/threads/%v", threadId)
+func DeleteThread(key string, threadID string, orgID string) (*ThreadDeleteResponse, error) {
+	url := fmt.Sprintf("https://api.openai.com/v1/threads/%v", threadID)
 	method := "DELETE"
 	var reqBody io.Reader = nil
 
@@ -150,8 +150,8 @@ func DeleteThread(key string, threadId string, orgId string) (*ThreadDeleteRespo
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("OpenAI-Beta", "assistants=v2")
 
-	if orgId != "" {
-		req.Header.Set("Openai-Organization", orgId)
+	if orgID != "" {
+		req.Header.Set("Openai-Organization", orgID)
 	}
 
 	resBody, err := request.Process[ThreadDeleteResponse](req)
@@ -163,8 +163,8 @@ func DeleteThread(key string, threadId string, orgId string) (*ThreadDeleteRespo
 	return resBody, nil
 }
 
-func AddMessage(key string, threadId string, message *CreatedMessage, orgId string) (*Message, error) {
-	url := fmt.Sprintf("https://api.openai.com/v1/threads/%v/messages", threadId)
+func AddMessage(key string, threadID string, message *CreatedMessage, orgID string) (*Message, error) {
+	url := fmt.Sprintf("https://api.openai.com/v1/threads/%v/messages", threadID)
 	method := "POST"
 
 	jsonData, err := json.Marshal(message)
@@ -186,8 +186,8 @@ func AddMessage(key string, threadId string, message *CreatedMessage, orgId stri
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("OpenAI-Beta", "assistants=v2")
 
-	if orgId != "" {
-		req.Header.Set("Openai-Organization", orgId)
+	if orgID != "" {
+		req.Header.Set("Openai-Organization", orgID)
 	}
 
 	resBody, err := request.Process[Message](req)

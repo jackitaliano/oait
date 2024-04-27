@@ -13,16 +13,16 @@ type Message struct {
 }
 
 type Thread struct {
-	ThreadId string    `json:"thread_id,omitempty"`
+	ThreadID string    `json:"thread_id,omitempty"`
 	Messages []Message `json:"messages,omitempty"`
 }
 
-func ParseThreads(threadIds []string, threads *[][]openai.Message) *[]Thread {
-	c := make(chan Thread, len(threadIds))
+func ParseThreads(threadIDs []string, threads *[][]openai.Message) *[]Thread {
+	c := make(chan Thread, len(threadIDs))
 
 	for i, thread := range *threads {
-		threadId := threadIds[i]
-		go parseThread(c, threadId, thread)
+		threadID := threadIDs[i]
+		go parseThread(c, threadID, thread)
 	}
 
 	results := make([]Thread, len(*threads))
@@ -44,11 +44,11 @@ func ThreadsToJson(threads *[]Thread) ([]byte, error) {
 	return b, nil
 }
 
-func parseThread(c chan Thread, threadId string, thread []openai.Message) {
+func parseThread(c chan Thread, threadID string, thread []openai.Message) {
 	messages := []Message{}
 
 	if len(thread) < 1 {
-		c <- Thread{threadId, messages}
+		c <- Thread{threadID, messages}
 		return
 	}
 
@@ -62,7 +62,7 @@ func parseThread(c chan Thread, threadId string, thread []openai.Message) {
 	}
 	reversedMessages := reverse(messages)
 
-	parsedThread := Thread{threadId, reversedMessages}
+	parsedThread := Thread{threadID, reversedMessages}
 
 	c <- parsedThread
 }

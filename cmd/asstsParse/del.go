@@ -35,7 +35,7 @@ func NewDelCommand(command *argparse.Command) *DelCommand {
 	asstsArg := subCommand.StringList("i", "ids", &argparse.Options{Required: false, Help: "List of Asst IDs"})
 	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "Asst Asst Input"})
 	allFlag := subCommand.Flag("A", "all", &argparse.Options{Required: false, Help: "Get all assts"})
-	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization Id"})
+	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization ID"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "Asst File Output"})
 	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
 	timeGTArg := subCommand.Float("D", "Days", &argparse.Options{Required: false, Help: "Filter by GT days"})
@@ -79,7 +79,7 @@ func (d *DelCommand) Run(key string) error {
 	} else {
 
 		fmt.Printf("Retrieving asst ids...\t")
-		asstIds, err := d.getAsstIds(&args)
+		asstIDs, err := d.getAsstIDs(&args)
 
 		if err != nil {
 			fmt.Printf("X\n")
@@ -88,7 +88,7 @@ func (d *DelCommand) Run(key string) error {
 		fmt.Printf("✓\n")
 
 		fmt.Printf("Retrieving assts...\t\t")
-		asstObjects = assts.RetrieveAssts(key, asstIds, *d.orgArg)
+		asstObjects = assts.RetrieveAssts(key, asstIDs, *d.orgArg)
 		fmt.Printf("✓\n")
 	}
 
@@ -101,7 +101,7 @@ func (d *DelCommand) Run(key string) error {
 	}
 	fmt.Printf("✓\n")
 
-	deleteAsstIds := getAsstIdsFromObjects(filteredAsstObjects)
+	deleteAsstIDs := getAsstIDsFromObjects(filteredAsstObjects)
 
 	verify := verifyBeforeDelete()
 
@@ -127,7 +127,7 @@ func (d *DelCommand) Run(key string) error {
 
 	if confirmed {
 		fmt.Printf("Deleting assts...\t\t")
-		numDeleted := assts.DeleteAssts(key, deleteAsstIds, *d.orgArg)
+		numDeleted := assts.DeleteAssts(key, deleteAsstIDs, *d.orgArg)
 		fmt.Printf("✓\n")
 		fmt.Printf("Deleted %v assts.\n", numDeleted)
 	} else {
@@ -145,29 +145,29 @@ func confirmDelete() bool {
 	return tui.YesNoLoop("Confirm deletion")
 }
 
-func (d *DelCommand) getAsstIds(args *[]argparse.Arg) ([]string, error) {
+func (d *DelCommand) getAsstIDs(args *[]argparse.Arg) ([]string, error) {
 	asstsParsed := (*args)[1].GetParsed()
 	inputParsed := (*args)[2].GetParsed()
 
 	if asstsParsed { // List passed
-		asstIds, err := assts.ListInput(*d.asstsArg)
+		asstIDs, err := assts.ListInput(*d.asstsArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return asstIds, nil
+		return asstIDs, nil
 
 	}
 
 	if inputParsed { // Asst input passed
-		asstIds, err := assts.FileInput(*d.inputArg)
+		asstIDs, err := assts.FileInput(*d.inputArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return asstIds, nil
+		return asstIDs, nil
 	}
 
 	errMsg := fmt.Sprintf("No input options passed to `%v`\n", d.name)
@@ -233,12 +233,12 @@ func (d *DelCommand) outputAssts(args *[]argparse.Arg, output *[]byte) error {
 	return nil
 }
 
-func getAsstIdsFromObjects(asstObjects *[]openai.AsstObject) []string {
-	asstIds := make([]string, len(*asstObjects))
+func getAsstIDsFromObjects(asstObjects *[]openai.AsstObject) []string {
+	asstIDs := make([]string, len(*asstObjects))
 
 	for i, asstObject := range *asstObjects {
-		asstIds[i] = asstObject.Id
+		asstIDs[i] = asstObject.ID
 	}
 
-	return asstIds
+	return asstIDs
 }

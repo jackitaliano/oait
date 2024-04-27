@@ -7,8 +7,8 @@ import (
 	"github.com/jackitaliano/oait/internal/openai"
 )
 
-func AddMessage(key string, threadId string, createdMessage *openai.CreatedMessage, orgId string) (*openai.Message, error) {
-	message, err := openai.AddMessage(key, threadId, createdMessage, orgId)
+func AddMessage(key string, threadID string, createdMessage *openai.CreatedMessage, orgID string) (*openai.Message, error) {
+	message, err := openai.AddMessage(key, threadID, createdMessage, orgID)
 
 	if err != nil {
 		return nil, err
