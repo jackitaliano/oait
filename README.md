@@ -1,6 +1,8 @@
 # OpenAI Tools
 CLI retrieve, modify, or add threads, files, images, etc. individually, programatically, etc.
 
+Mainly for developer use to access OpenAI API endpoints via CLI easily. Helps automate some things like cleanup of threads/files/assistants.
+
 # Install
 ## Go
 1. Install Go Lang: http://golang.org/doc/install.html
@@ -9,6 +11,17 @@ CLI retrieve, modify, or add threads, files, images, etc. individually, programa
 ## Homebrew
 1. `brew tap jackitaliano/tap`
 2. `brew install oait`
+
+# API Support
+## Current
+- threads
+- files
+- assistants
+
+## Planned
+- runs
+- vector stores
+- chats
 
 # Use
 You can either put in your OpenAI key each time with the -k flag, or add to environment with:
