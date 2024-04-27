@@ -9,7 +9,7 @@ import (
 
 func FilterByDaysLTE(files *[]openai.FileObject, days float64) (*[]openai.FileObject, error) {
 
-	if (days < 0) {
+	if days < 0 {
 		err := errors.New("Invalid number of days: negative numbers not supported")
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func FilterByDaysLTE(files *[]openai.FileObject, days float64) (*[]openai.FileOb
 }
 
 func FilterByDaysGT(files *[]openai.FileObject, days float64) (*[]openai.FileObject, error) {
-	if (days < 0) {
+	if days < 0 {
 		err := errors.New("Invalid number of days: negative numbers not supported")
 		return nil, err
 	}

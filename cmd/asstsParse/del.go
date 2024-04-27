@@ -233,7 +233,7 @@ func (d *DelCommand) outputAssts(args *[]argparse.Arg, output *[]byte) error {
 	return nil
 }
 
-func getAsstIdsFromObjects(asstObjects *[]openai.AsstObject) ([]string) {
+func getAsstIdsFromObjects(asstObjects *[]openai.AsstObject) []string {
 	asstIds := make([]string, len(*asstObjects))
 
 	for i, asstObject := range *asstObjects {

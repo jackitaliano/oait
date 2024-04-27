@@ -160,13 +160,13 @@ func (c *CreateCommand) getCreatedAssistant(args *[]argparse.Arg) (*openai.Creat
 	}
 
 	createdAssistant := openai.CreatedAssistant{
-		Name: *c.asstName,
-		Description: *c.asstDesc,
+		Name:         *c.asstName,
+		Description:  *c.asstDesc,
 		Instructions: *c.instruct,
-		Model: *c.model,
-		Temp: *c.temp,
-		TopP: *c.topP,
-		ResFormat: *c.resForm,
+		Model:        *c.model,
+		Temp:         *c.temp,
+		TopP:         *c.topP,
+		ResFormat:    *c.resForm,
 	}
 
 	return &createdAssistant, nil

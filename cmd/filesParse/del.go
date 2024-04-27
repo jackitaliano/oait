@@ -229,7 +229,7 @@ func (d *DelCommand) outputFiles(args *[]argparse.Arg, output *[]byte) error {
 	return nil
 }
 
-func getFileIdsFromObjects(fileObjects *[]openai.FileObject) ([]string) {
+func getFileIdsFromObjects(fileObjects *[]openai.FileObject) []string {
 	fileIds := make([]string, len(*fileObjects))
 
 	for i, fileObject := range *fileObjects {

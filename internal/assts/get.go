@@ -34,7 +34,7 @@ func RetrieveAssts(key string, threadIds []string, orgId string) *[]openai.AsstO
 	return &files
 }
 
-func RetrieveAllAssts(key string, orgId string) (*[]openai.AsstObject, error ) {
+func RetrieveAllAssts(key string, orgId string) (*[]openai.AsstObject, error) {
 	files, err := openai.GetAllAsstObjects(key, orgId)
 
 	if err != nil {

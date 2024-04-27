@@ -243,7 +243,7 @@ func (d *DelCommand) outputThreads(args *[]argparse.Arg, output *[]byte) error {
 	return nil
 }
 
-func getThreadIdsFromObjects(threads *[][]openai.Message) ([]string) {
+func getThreadIdsFromObjects(threads *[][]openai.Message) []string {
 	threadIds := []string{}
 
 	for _, fileObject := range *threads {

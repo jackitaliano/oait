@@ -21,7 +21,7 @@ type GetCommand struct {
 	sessionArg   *string
 	orgArg       *string
 	outputArg    *string
-	prettyFlag      *bool
+	prettyFlag   *bool
 	timeLTEArg   *float64
 	timeGTArg    *float64
 	lengthLTEArg *float64
