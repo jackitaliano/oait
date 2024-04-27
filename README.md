@@ -1,6 +1,17 @@
 # OpenAI Tools
 CLI retrieve, modify, or add threads, files, images, etc. individually, programatically, etc.
 
+# Install
+## Go
+1. Install Go Lang: http://golang.org/doc/install.html
+2. `go install github.com/jackitaliano/oait@latest
+
+## Homebrew
+1. `brew tap jackitaliano/tap`
+2. `brew install oait`
+
+# Use
+
 For info:
 ```bash
 oait --help
