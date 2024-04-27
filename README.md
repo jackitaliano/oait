@@ -4,7 +4,7 @@ CLI retrieve, modify, or add threads, files, images, etc. individually, programa
 # Install
 ## Go
 1. Install Go Lang: http://golang.org/doc/install.html
-2. `go install github.com/jackitaliano/oait@latest
+2. `go install github.com/jackitaliano/oait@latest`
 
 ## Homebrew
 1. `brew tap jackitaliano/tap`
