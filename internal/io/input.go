@@ -28,9 +28,7 @@ func ListInput(IDs []string) ([]string, error) {
 	for _, idsStr := range IDs {
 		ids := splitIDs(idsStr, " ")
 
-		for _, id := range ids {
-			allFileIDs = append(allFileIDs, id)
-		}
+		allFileIDs = append(allFileIDs, ids...)
 	}
 
 	return allFileIDs, nil
@@ -80,8 +78,8 @@ func JSONInput[T any](fileName string) (*T, error) {
 	return &jsonData, nil
 }
 
-func SessionInput(sessionId string, orgId string) ([]string, error) {
-	sessionThreadsRes, err := openai.GetSessionThreads(sessionId, orgId)
+func SessionInput(sessionID string, orgID string) ([]string, error) {
+	sessionThreadsRes, err := openai.GetSessionThreads(sessionID, orgID)
 
 	if err != nil {
 		return nil, err

@@ -33,7 +33,8 @@ func Process[T Response](req *http.Request) (*T, error) {
 
 	if res.StatusCode != http.StatusOK {
 		var errRes ErrorResponse
-		err = json.NewDecoder(res.Body).Decode(&errRes)
+		json.NewDecoder(res.Body).Decode(&errRes)
+
 		errMsg := fmt.Sprintf("Error: Request (%v). Status: (%v). Message: %v", *req.URL, res.StatusCode, errRes.Error.Message)
 		err = errors.New(errMsg)
 

@@ -69,13 +69,13 @@ func (a *AddCommand) Run(key string) error {
 	verify := verifyBeforeAdd()
 
 	if verify {
-		messageJson, err := io.ObjToJSON(message)
+		messageJSON, err := io.ObjToJSON(message)
 
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%v\n", string(*&messageJson))
+		fmt.Printf("%v\n", string(messageJSON))
 	}
 
 	confirmed := confirmAdd()

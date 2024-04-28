@@ -64,9 +64,7 @@ func GetFileObject(key string, fileID string, orgID string) (*FileObject, error)
 }
 
 func GetAllFileObjects(key string, orgID string) (*FileObjectsResponse, error) {
-	var url string
-
-	url = "https://api.openai.com/v1/files"
+	url := "https://api.openai.com/v1/files"
 
 	method := "GET"
 	var reqBody io.Reader = nil

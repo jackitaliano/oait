@@ -119,7 +119,7 @@ func GetThreadMessages(key string, threadID string, orgID string) (*MessagesResp
 }
 
 func GetSessionThreads(sessionID string, orgID string) (*SessionThreadsResponse, error) {
-	url := fmt.Sprintf("https://api.openai.com/v1/threads?limit=100")
+	url := "https://api.openai.com/v1/threads?limit=100"
 	method := "GET"
 	var reqBody io.Reader = nil
 

@@ -37,12 +37,12 @@ func main() {
 		*keyArg = os.Getenv("OPENAI_API_KEY")
 	}
 
-	var commands []*argparse.Command = parser.GetCommands()
+	commands := parser.GetCommands()
 
-	var threadsCommand *argparse.Command = commands[0]
-	var filesCommand *argparse.Command = commands[1]
-	var asstsCommand *argparse.Command = commands[2]
-	var imagesCommand *argparse.Command = commands[3]
+	threadsCommand := commands[0]
+	filesCommand := commands[1]
+	asstsCommand := commands[2]
+	imagesCommand := commands[3]
 
 	if threadsCommand.Happened() {
 		err := threadsService.Run(*keyArg)

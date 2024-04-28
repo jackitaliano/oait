@@ -111,9 +111,7 @@ func GetAsstObject(key string, asstID string, orgID string) (*AsstObject, error)
 }
 
 func GetAllAsstObjects(key string, orgID string) (*AsstObjectsResponse, error) {
-	var url string
-
-	url = "https://api.openai.com/v1/assistants?limit=100"
+	url := "https://api.openai.com/v1/assistants?limit=100"
 
 	method := "GET"
 	var reqBody io.Reader = nil
@@ -144,9 +142,7 @@ func GetAllAsstObjects(key string, orgID string) (*AsstObjectsResponse, error) {
 }
 
 func NewAssistant(key string, asst *CreatedAssistant, orgID string) (*AsstObject, error) {
-	var url string
-
-	url = "https://api.openai.com/v1/assistants"
+	url := "https://api.openai.com/v1/assistants"
 
 	method := "POST"
 	jsonData, err := json.Marshal(*asst)

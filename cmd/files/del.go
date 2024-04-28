@@ -63,19 +63,16 @@ func (d *DelCommand) Run(key string) error {
 	allParsed := args[3].GetParsed()
 
 	var fileObjects *[]openai.FileObject
-	var fileIDs []string
-	var err error
 
 	if allParsed && *d.allFlag {
 		fmt.Printf("Retrieving all files...\t\t")
 		fileObjects = openai.RetrieveAllFiles(key, *d.orgArg)
-		fileIDs = getFileIDsFromObjects(fileObjects)
 		fmt.Printf("✓\n")
 
 	} else {
 
 		fmt.Printf("Retrieving file ids...\t")
-		fileIDs, err = d.getFileIDs(&args)
+		fileIDs, err := d.getFileIDs(&args)
 
 		if err != nil {
 			fmt.Printf("X\n")
