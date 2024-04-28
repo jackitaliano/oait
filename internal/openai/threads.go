@@ -35,12 +35,27 @@ type MessageContent struct {
 type Message struct {
 	ID          string           `json:"id"`
 	Object      string           `json:"object"`
-	CreatedAt   int              `json:"created_at"`
+	CreatedAt   int64            `json:"created_at"`
 	AssistantID string           `json:"assistant_id"`
 	ThreadID    string           `json:"thread_id"`
 	RunID       string           `json:"run_id"`
 	Role        string           `json:"role"`
 	Content     []MessageContent `json:"content"`
+}
+
+type Messages struct {
+	Messages []Message
+}
+
+func (m Messages) CreatedAt() int64 {
+	if m.Len() > 0 {
+		return m.Messages[0].CreatedAt
+	}
+	return 0
+}
+
+func (m Messages) Len() int {
+	return len(m.Messages)
 }
 
 type MessagesResponse struct {

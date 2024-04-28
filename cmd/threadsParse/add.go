@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
 	"github.com/jackitaliano/oait/internal/threads"
 	"github.com/jackitaliano/oait/internal/tui"
@@ -103,7 +104,7 @@ func (a *AddCommand) getThreadID(args *[]argparse.Arg) (*string, error) {
 	threadParsed := (*args)[1].GetParsed()
 
 	if threadParsed { // List passed
-		threadID, err := threads.SingleInput(*a.threadArg)
+		threadID, err := io.SingleInput(*a.threadArg)
 
 		if err != nil {
 			return nil, err

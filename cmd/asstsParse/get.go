@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"github.com/jackitaliano/oait/internal/assts"
+	"github.com/jackitaliano/oait/internal/filter"
+	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
 
 	"github.com/akamensky/argparse"
@@ -124,7 +126,7 @@ func (g *GetCommand) getAsstIDs(args *[]argparse.Arg) ([]string, error) {
 	inputParsed := (*args)[2].GetParsed()
 
 	if asstsParsed { // List passed
-		asstIDs, err := assts.ListInput(*g.asstsArg)
+		asstIDs, err := io.ListInput(*g.asstsArg)
 
 		if err != nil {
 			return nil, err
@@ -135,7 +137,7 @@ func (g *GetCommand) getAsstIDs(args *[]argparse.Arg) ([]string, error) {
 	}
 
 	if inputParsed { // Asst input passed
-		asstIDs, err := assts.FileInput(*g.inputArg)
+		asstIDs, err := io.FileInput(*g.inputArg)
 
 		if err != nil {
 			return nil, err
@@ -155,7 +157,7 @@ func (g *GetCommand) filterAssts(args *[]argparse.Arg, asstObjects *[]openai.Ass
 	timeGTParsed := (*args)[7].GetParsed()
 
 	if timeLTEParsed {
-		filtered, err := assts.FilterByDaysLTE(asstObjects, *g.timeLTEArg)
+		filtered, err := filter.DaysLTE(asstObjects, *g.timeLTEArg)
 
 		if err != nil {
 			return nil, err
@@ -164,7 +166,7 @@ func (g *GetCommand) filterAssts(args *[]argparse.Arg, asstObjects *[]openai.Ass
 		return filtered, nil
 
 	} else if timeGTParsed {
-		filtered, err := assts.FilterByDaysGT(asstObjects, *g.timeGTArg)
+		filtered, err := filter.DaysGT(asstObjects, *g.timeGTArg)
 
 		if err != nil {
 			return nil, err
@@ -194,7 +196,7 @@ func (g *GetCommand) outputAssts(args *[]argparse.Arg, output *[]byte) error {
 	outputParsed := (*args)[5].GetParsed()
 
 	if outputParsed {
-		err := assts.FileOutput(*g.outputArg, output)
+		err := io.FileOutput(*g.outputArg, output)
 
 		if err != nil {
 			return err

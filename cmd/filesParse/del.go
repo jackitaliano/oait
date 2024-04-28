@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"github.com/jackitaliano/oait/internal/files"
+	"github.com/jackitaliano/oait/internal/filter"
+	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
 	"github.com/jackitaliano/oait/internal/tui"
 
@@ -146,7 +148,7 @@ func (d *DelCommand) getFileIDs(args *[]argparse.Arg) ([]string, error) {
 	inputParsed := (*args)[2].GetParsed()
 
 	if filesParsed { // List passed
-		fileIDs, err := files.ListInput(*d.filesArg)
+		fileIDs, err := io.ListInput(*d.filesArg)
 
 		if err != nil {
 			return nil, err
@@ -157,7 +159,7 @@ func (d *DelCommand) getFileIDs(args *[]argparse.Arg) ([]string, error) {
 	}
 
 	if inputParsed { // File input passed
-		fileIDs, err := files.FileInput(*d.inputArg)
+		fileIDs, err := io.FileInput(*d.inputArg)
 
 		if err != nil {
 			return nil, err
@@ -177,7 +179,7 @@ func (d *DelCommand) filterFiles(args *[]argparse.Arg, fileObjects *[]openai.Fil
 	timeGTParsed := (*args)[7].GetParsed()
 
 	if timeLTEParsed {
-		filtered, err := files.FilterByDaysLTE(fileObjects, *d.timeLTEArg)
+		filtered, err := filter.DaysLTE(fileObjects, *d.timeLTEArg)
 
 		if err != nil {
 			return nil, err
@@ -186,7 +188,7 @@ func (d *DelCommand) filterFiles(args *[]argparse.Arg, fileObjects *[]openai.Fil
 		return filtered, nil
 
 	} else if timeGTParsed {
-		filtered, err := files.FilterByDaysGT(fileObjects, *d.timeGTArg)
+		filtered, err := filter.DaysGT(fileObjects, *d.timeGTArg)
 
 		if err != nil {
 			return nil, err
@@ -216,7 +218,7 @@ func (d *DelCommand) outputFiles(args *[]argparse.Arg, output *[]byte) error {
 	outputParsed := (*args)[4].GetParsed()
 
 	if outputParsed {
-		err := files.FileOutput(*d.outputArg, output)
+		err := io.FileOutput(*d.outputArg, output)
 
 		if err != nil {
 			return err

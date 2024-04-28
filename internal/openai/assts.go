@@ -36,7 +36,7 @@ type Tool struct {
 type AsstObject struct {
 	ID            string                         `json:"id"`
 	Object        string                         `json:"object"`
-	CreatedAt     int                            `json:"created_at"`
+	Created       int64                          `json:"created_at"`
 	Name          string                         `json:"name"`
 	Description   string                         `json:"description"`
 	Instructions  string                         `json:"instructions"`
@@ -48,9 +48,17 @@ type AsstObject struct {
 	TopP          float64                        `json:"top_p"`
 }
 
+func (a AsstObject) CreatedAt() int64 {
+	return a.Created
+}
+
 type AsstObjectsResponse struct {
 	Data   []AsstObject `json:"data"`
 	Object string       `json:"object"`
+}
+
+func (a AsstObjectsResponse) Len() int {
+	return len(a.Data)
 }
 
 type CreatedAssistant struct {

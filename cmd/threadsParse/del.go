@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jackitaliano/oait/internal/filter"
+	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
 	"github.com/jackitaliano/oait/internal/threads"
 	"github.com/jackitaliano/oait/internal/tui"
@@ -85,7 +87,12 @@ func (d *DelCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering threads...\t\t")
-	filteredThreads := d.filterThreads(&args, rawThreads)
+	filteredThreads, err := d.filterThreads(&args, rawThreads)
+
+	if err != nil {
+		fmt.Printf("X\n")
+		return err
+	}
 	fmt.Printf("✓\n")
 
 	verify := verifyBeforeDelete()
@@ -138,7 +145,7 @@ func (d *DelCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	sessionParsed := (*args)[3].GetParsed()
 
 	if threadsParsed { // List passed
-		threadIDs, err := threads.ListInput(*d.threadsArg)
+		threadIDs, err := io.ListInput(*d.threadsArg)
 
 		if err != nil {
 			return nil, err
@@ -149,7 +156,7 @@ func (d *DelCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	}
 
 	if inputParsed { // File input passed
-		threadIDs, err := threads.FileInput(*d.inputArg)
+		threadIDs, err := io.FileInput(*d.inputArg)
 
 		if err != nil {
 			return nil, err
@@ -159,7 +166,7 @@ func (d *DelCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	}
 
 	if sessionParsed {
-		threadIDs, err := threads.SessionInput(*d.sessionArg, *d.orgArg)
+		threadIDs, err := io.SessionInput(*d.sessionArg, *d.orgArg)
 
 		if err != nil {
 			return nil, err
@@ -175,31 +182,55 @@ func (d *DelCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	return nil, err
 }
 
-func (d *DelCommand) filterThreads(args *[]argparse.Arg, rawThreads *[][]openai.Message) *[][]openai.Message {
+func (d *DelCommand) filterThreads(args *[]argparse.Arg, rawThreads *[]openai.Messages) (*[]openai.Messages, error) {
 	timeLTEParsed := (*args)[7].GetParsed()
 	timeGTParsed := (*args)[8].GetParsed()
 	lengthLTEParsed := (*args)[9].GetParsed()
 	lengthGTParsed := (*args)[10].GetParsed()
 
 	if timeLTEParsed {
-		return threads.FilterByDaysLTE(rawThreads, *d.timeLTEArg)
+		filtered, err := filter.DaysLTE(rawThreads, *d.timeLTEArg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return filtered, nil
 
 	} else if timeGTParsed {
-		return threads.FilterByDaysGT(rawThreads, *d.timeGTArg)
+		filtered, err := filter.DaysGT(rawThreads, *d.timeGTArg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return filtered, nil
 	}
 
 	// Filter length flow
 	if lengthLTEParsed {
-		return threads.FilterByLengthLTE(rawThreads, *d.lengthLTEArg)
+		filtered, err := filter.LengthLTE(rawThreads, *d.lengthLTEArg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return filtered, nil
 
 	} else if lengthGTParsed {
-		return threads.FilterByLengthGT(rawThreads, *d.lengthGTArg)
+		filtered, err := filter.LengthGT(rawThreads, *d.lengthGTArg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return filtered, nil
 	}
 
-	return rawThreads
+	return rawThreads, nil
 }
 
-func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, filteredThreads *[][]openai.Message) (*[]byte, error) {
+func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, filteredThreads *[]openai.Messages) (*[]byte, error) {
 	rawParsed := (*args)[6].GetParsed()
 
 	if rawParsed && *(d.rawFlag) {
@@ -230,7 +261,7 @@ func (d *DelCommand) outputThreads(args *[]argparse.Arg, output *[]byte) error {
 	outputParsed := (*args)[5].GetParsed()
 
 	if outputParsed {
-		err := threads.FileOutput(*d.outputArg, output)
+		err := io.FileOutput(*d.outputArg, output)
 
 		if err != nil {
 			return err
@@ -243,12 +274,12 @@ func (d *DelCommand) outputThreads(args *[]argparse.Arg, output *[]byte) error {
 	return nil
 }
 
-func getThreadIDsFromObjects(threads *[][]openai.Message) []string {
+func getThreadIDsFromObjects(threads *[]openai.Messages) []string {
 	threadIDs := []string{}
 
-	for _, fileObject := range *threads {
-		if len(fileObject) > 0 {
-			threadIDs = append(threadIDs, fileObject[0].ID)
+	for _, thread := range *threads {
+		if thread.Len() > 0 {
+			threadIDs = append(threadIDs, thread.Messages[0].ID)
 		}
 	}
 

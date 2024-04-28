@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/jackitaliano/oait/internal/assts"
+	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
 	"github.com/jackitaliano/oait/internal/tui"
 
@@ -140,8 +141,7 @@ func (c *CreateCommand) getCreatedAssistant(args *[]argparse.Arg) (*openai.Creat
 	inputParsed := (*args)[8].GetParsed()
 
 	if inputParsed {
-		createdAssistant, err := assts.JsonInput[openai.CreatedAssistant](*c.inputArg)
-
+		createdAssistant, err := io.JSONInput[openai.CreatedAssistant](*c.inputArg)
 		if err != nil {
 			return nil, err
 		}

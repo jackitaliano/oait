@@ -17,12 +17,12 @@ type Thread struct {
 	Messages []Message `json:"messages,omitempty"`
 }
 
-func ParseThreads(threadIDs []string, threads *[][]openai.Message) *[]Thread {
+func ParseThreads(threadIDs []string, threads *[]openai.Messages) *[]Thread {
 	c := make(chan Thread, len(threadIDs))
 
 	for i, thread := range *threads {
 		threadID := threadIDs[i]
-		go parseThread(c, threadID, thread)
+		go parseThread(c, threadID, thread.Messages)
 	}
 
 	results := make([]Thread, len(*threads))

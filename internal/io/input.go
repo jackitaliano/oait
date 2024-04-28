@@ -1,18 +1,20 @@
-package threads
+package io
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/jackitaliano/oait/internal/openai"
 )
 
-func SingleInput(threadID string) (string, error) {
-	trimmedString := strings.Trim(threadID, " ")
+func SingleInput(ID string) (string, error) {
+	trimmedString := strings.Trim(ID, " ")
 
 	if trimmedString == "" {
-		errMsg := "Invalid thread id passed ' '"
+		errMsg := "Invalid file id passed ' '"
 		err := errors.New(errMsg)
 		return "", err
 	}
@@ -20,18 +22,18 @@ func SingleInput(threadID string) (string, error) {
 	return trimmedString, nil
 }
 
-func ListInput(threadIDs []string) ([]string, error) {
-	var allThreadIDs []string
+func ListInput(IDs []string) ([]string, error) {
+	var allFileIDs []string
 
-	for _, idsStr := range threadIDs {
+	for _, idsStr := range IDs {
 		ids := splitIDs(idsStr, " ")
 
 		for _, id := range ids {
-			allThreadIDs = append(allThreadIDs, id)
+			allFileIDs = append(allFileIDs, id)
 		}
 	}
 
-	return allThreadIDs, nil
+	return allFileIDs, nil
 }
 
 func FileInput(fileName string) ([]string, error) {
@@ -54,33 +56,46 @@ func FileInput(fileName string) ([]string, error) {
 
 }
 
-func SessionInput(sessionID string, orgID string) ([]string, error) {
-	sessionThreadsRes, err := openai.GetSessionThreads(sessionID, orgID)
+func JSONInput[T any](fileName string) (*T, error) {
+	fileExt := fileName[len(fileName)-4:]
+	if fileExt != "json" {
+		errMsg := fmt.Sprintf("Invalid file name: '%v' Only JSON is valid.", fileName)
+		err := errors.New(errMsg)
+		return nil, err
+	}
+
+	file, err := os.Open(fileName)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var jsonData T
+	err = json.NewDecoder(file).Decode(&jsonData)
 
 	if err != nil {
 		return nil, err
 	}
 
-	threadIDs := make([]string, len(sessionThreadsRes.Data))
+	return &jsonData, nil
+}
+
+func SessionInput(sessionId string, orgId string) ([]string, error) {
+	sessionThreadsRes, err := openai.GetSessionThreads(sessionId, orgId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	threadIds := make([]string, len(sessionThreadsRes.Data))
 
 	for i, thread := range (*sessionThreadsRes).Data {
 		id := thread.ID
 
-		threadIDs[i] = id
+		threadIds[i] = id
 	}
 
-	return threadIDs, nil
-}
-
-func FileOutput(fileName string, data *[]byte) error {
-	err := os.WriteFile(fileName, *data, 0644)
-
-	if err != nil {
-		err = errors.New("Failed to write to file: " + fileName)
-		return err
-	}
-
-	return nil
+	return threadIds, nil
 }
 
 func txtInput(fileName string) ([]string, error) {
@@ -94,14 +109,14 @@ func txtInput(fileName string) ([]string, error) {
 	stringData := string(data)
 	splitStrings := splitIDs(stringData, "\n")
 
-	var threadIDs []string
+	var asstIDs []string
 	for _, val := range splitStrings {
 		if val != "" {
-			threadIDs = append(threadIDs, val)
+			asstIDs = append(asstIDs, val)
 		}
 	}
 
-	return threadIDs, nil
+	return asstIDs, nil
 }
 
 func splitIDs(str string, delimeter string) []string {

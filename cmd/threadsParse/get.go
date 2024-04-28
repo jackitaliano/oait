@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jackitaliano/oait/internal/filter"
+	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
 	"github.com/jackitaliano/oait/internal/threads"
 
@@ -85,7 +87,12 @@ func (g *GetCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering threads...\t\t")
-	filteredThreads := g.filterThreads(&args, rawThreads)
+	filteredThreads, err := g.filterThreads(&args, rawThreads)
+
+	if err != nil {
+		fmt.Printf("X\n")
+		return err
+	}
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Formatting thread output...\t")
@@ -113,7 +120,7 @@ func (g *GetCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	sessionParsed := (*args)[3].GetParsed()
 
 	if threadsParsed { // List passed
-		threadIDs, err := threads.ListInput(*g.threadsArg)
+		threadIDs, err := io.ListInput(*g.threadsArg)
 
 		if err != nil {
 			return nil, err
@@ -124,7 +131,7 @@ func (g *GetCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	}
 
 	if inputParsed { // File input passed
-		threadIDs, err := threads.FileInput(*g.inputArg)
+		threadIDs, err := io.FileInput(*g.inputArg)
 
 		if err != nil {
 			return nil, err
@@ -134,7 +141,7 @@ func (g *GetCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	}
 
 	if sessionParsed {
-		threadIDs, err := threads.SessionInput(*g.sessionArg, *g.orgArg)
+		threadIDs, err := io.SessionInput(*g.sessionArg, *g.orgArg)
 
 		if err != nil {
 			return nil, err
@@ -150,31 +157,55 @@ func (g *GetCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	return nil, err
 }
 
-func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[][]openai.Message) *[][]openai.Message {
+func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[]openai.Messages) (*[]openai.Messages, error) {
 	timeLTEParsed := (*args)[7].GetParsed()
 	timeGTParsed := (*args)[8].GetParsed()
 	lengthLTEParsed := (*args)[9].GetParsed()
 	lengthGTParsed := (*args)[10].GetParsed()
 
 	if timeLTEParsed {
-		return threads.FilterByDaysLTE(rawThreads, *g.timeLTEArg)
+		filtered, err := filter.DaysLTE(rawThreads, *g.timeLTEArg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return filtered, nil
 
 	} else if timeGTParsed {
-		return threads.FilterByDaysGT(rawThreads, *g.timeGTArg)
+		filtered, err := filter.DaysGT(rawThreads, *g.timeGTArg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return filtered, nil
 	}
 
 	// Filter length flow
 	if lengthLTEParsed {
-		return threads.FilterByLengthLTE(rawThreads, *g.lengthLTEArg)
+		filtered, err := filter.LengthLTE(rawThreads, *g.lengthLTEArg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return filtered, nil
 
 	} else if lengthGTParsed {
-		return threads.FilterByLengthGT(rawThreads, *g.lengthGTArg)
+		filtered, err := filter.LengthGT(rawThreads, *g.lengthGTArg)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return filtered, nil
 	}
 
-	return rawThreads
+	return rawThreads, nil
 }
 
-func (g *GetCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, filteredThreads *[][]openai.Message) (*[]byte, error) {
+func (g *GetCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, filteredThreads *[]openai.Messages) (*[]byte, error) {
 	prettyParsed := (*args)[6].GetParsed()
 
 	if prettyParsed && *(g.prettyFlag) {
@@ -204,7 +235,7 @@ func (g *GetCommand) outputThreads(args *[]argparse.Arg, output *[]byte) error {
 	outputParsed := (*args)[5].GetParsed()
 
 	if outputParsed {
-		err := threads.FileOutput(*g.outputArg, output)
+		err := io.FileOutput(*g.outputArg, output)
 
 		if err != nil {
 			return err

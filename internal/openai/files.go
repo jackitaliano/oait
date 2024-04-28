@@ -10,12 +10,16 @@ import (
 )
 
 type FileObject struct {
-	ID        string `json:"id"`
-	Object    string `json:"object"`
-	Bytes     int    `json:"bytes"`
-	CreatedAt int    `json:"created_at"`
-	Filename  string `json:"filename"`
-	Purpose   string `json:"purpose"`
+	ID       string `json:"id"`
+	Object   string `json:"object"`
+	Bytes    int    `json:"bytes"`
+	Created  int64  `json:"created_at"`
+	Filename string `json:"filename"`
+	Purpose  string `json:"purpose"`
+}
+
+func (f FileObject) CreatedAt() int64 {
+	return f.Created
 }
 
 type FileObjectsResponse struct {
