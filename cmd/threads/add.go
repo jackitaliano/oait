@@ -1,4 +1,4 @@
-package threadsParse
+package threads
 
 import (
 	"errors"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
-	"github.com/jackitaliano/oait/internal/threads"
 	"github.com/jackitaliano/oait/internal/tui"
 
 	"github.com/akamensky/argparse"
@@ -70,7 +69,7 @@ func (a *AddCommand) Run(key string) error {
 	verify := verifyBeforeAdd()
 
 	if verify {
-		messageJson, err := threads.CreatedMessageToJson(message)
+		messageJson, err := io.ObjToJSON(message)
 
 		if err != nil {
 			return err
@@ -83,7 +82,7 @@ func (a *AddCommand) Run(key string) error {
 
 	if confirmed {
 		fmt.Printf("Adding message...\t\t")
-		threads.AddMessage(key, *threadID, message, *a.orgArg)
+		openai.AddMessage(key, *threadID, message, *a.orgArg)
 		fmt.Printf("✓\n")
 	} else {
 		fmt.Printf("Canceled.\n")
@@ -123,7 +122,7 @@ func (a *AddCommand) createMessage(args *[]argparse.Arg, threadID string) (*open
 	messageParsed := (*args)[4].GetParsed()
 
 	if messageParsed {
-		message := threads.CreateMessage(*a.messageArg, *a.roleArg)
+		message := io.CreateMessage(*a.messageArg, *a.roleArg)
 
 		return message, nil
 	}

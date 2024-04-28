@@ -1,126 +1,78 @@
 package openai
 
 import (
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
-
-	"github.com/jackitaliano/oait/internal/request"
 )
 
-type FileObject struct {
-	ID       string `json:"id"`
-	Object   string `json:"object"`
-	Bytes    int    `json:"bytes"`
-	Created  int64  `json:"created_at"`
-	Filename string `json:"filename"`
-	Purpose  string `json:"purpose"`
-}
+func deleteFile(c chan *FileDeleteResponse, key string, fileID string, orgID string) {
 
-func (f FileObject) CreatedAt() int64 {
-	return f.Created
-}
-
-type FileObjectsResponse struct {
-	Data   []FileObject `json:"data"`
-	Object string       `json:"object"`
-}
-
-type FileDeleteResponse struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Deleted bool   `json:"deleted"`
-}
-
-func GetFileObject(key string, fileID string, orgID string) (*FileObject, error) {
-	url := fmt.Sprintf("https://api.openai.com/v1/files/%v", fileID)
-
-	method := "GET"
-	var reqBody io.Reader = nil
-
-	req, err := http.NewRequest(method, url, reqBody)
+	deleteResponse, err := DeleteFile(key, fileID, orgID)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error creating request to '%v':\nError: %v", url, err)
-		err = errors.New(errMsg)
-		return nil, err
+		fmt.Println(err)
+		c <- nil
+		return
 	}
 
-	req.Header.Set("Authorization", "Bearer "+key)
-	req.Header.Set("Content-Type", "application/json")
-
-	if orgID != "" {
-		req.Header.Set("Openai-Organization", orgID)
-	}
-
-	resBody, err := request.Process[FileObject](req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return resBody, nil
+	c <- deleteResponse
 }
 
-func GetAllFileObjects(key string, orgID string) (*FileObjectsResponse, error) {
-	var url string
+func DeleteFiles(key string, fileIDs []string, orgID string) int {
+	c := make(chan *FileDeleteResponse, len(fileIDs))
 
-	url = "https://api.openai.com/v1/files"
-
-	method := "GET"
-	var reqBody io.Reader = nil
-
-	req, err := http.NewRequest(method, url, reqBody)
-
-	if err != nil {
-		errMsg := fmt.Sprintf("Error creating request to '%v':\nError: %v", url, err)
-		err = errors.New(errMsg)
-		return nil, err
+	for _, threadID := range fileIDs {
+		go deleteFile(c, key, threadID, orgID)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+key)
-	req.Header.Set("Content-Type", "application/json")
+	results := make([]*FileDeleteResponse, len(fileIDs))
+	numDeleted := 0
 
-	if orgID != "" {
-		req.Header.Set("Openai-Organization", orgID)
+	for i := range results {
+		res := <-c
+		results[i] = res
+
+		if res.Deleted {
+			numDeleted += 1
+		}
 	}
 
-	resBody, err := request.Process[FileObjectsResponse](req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return resBody, nil
+	return numDeleted
 }
 
-func DeleteFile(key string, fileID string, orgID string) (*FileDeleteResponse, error) {
-	url := fmt.Sprintf("https://api.openai.com/v1/files/%v", fileID)
+func retrieveFile(c chan FileObject, key string, fileID string, orgID string) {
 
-	method := "DELETE"
-	var reqBody io.Reader = nil
-
-	req, err := http.NewRequest(method, url, reqBody)
+	fileObject, err := GetFileObject(key, fileID, orgID)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error creating request to '%v':\nError: %v", url, err)
-		err = errors.New(errMsg)
-		return nil, err
+		fmt.Println(err)
+		c <- FileObject{}
+		return
 	}
 
-	req.Header.Set("Authorization", "Bearer "+key)
-	req.Header.Set("Content-Type", "application/json")
+	c <- *fileObject
+}
 
-	if orgID != "" {
-		req.Header.Set("Openai-Organization", orgID)
+func RetrieveFiles(key string, threadIDs []string, orgID string) *[]FileObject {
+	c := make(chan FileObject, len(threadIDs))
+
+	for _, threadID := range threadIDs {
+		go retrieveFile(c, key, threadID, orgID)
 	}
 
-	resBody, err := request.Process[FileDeleteResponse](req)
+	files := make([]FileObject, len(threadIDs))
+	for i := range files {
+		files[i] = <-c
+	}
+
+	return &files
+}
+
+func RetrieveAllFiles(key string, orgID string) *[]FileObject {
+	files, err := GetAllFileObjects(key, orgID)
 
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
-	return resBody, nil
+	return &files.Data
 }

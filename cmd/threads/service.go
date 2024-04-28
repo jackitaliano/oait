@@ -1,4 +1,4 @@
-package threadsParse
+package threads
 
 import (
 	"errors"

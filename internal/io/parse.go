@@ -1,4 +1,4 @@
-package threads
+package io
 
 import (
 	"encoding/json"
@@ -17,6 +17,12 @@ type Thread struct {
 	Messages []Message `json:"messages,omitempty"`
 }
 
+func CreateMessage(text string, role string) *openai.CreatedMessage {
+	message := openai.CreatedMessage{Role: role, Content: text}
+
+	return &message
+}
+
 func ParseThreads(threadIDs []string, threads *[]openai.Messages) *[]Thread {
 	c := make(chan Thread, len(threadIDs))
 
@@ -33,8 +39,19 @@ func ParseThreads(threadIDs []string, threads *[]openai.Messages) *[]Thread {
 	return &results
 }
 
-func ThreadsToJson(threads *[]Thread) ([]byte, error) {
-	b, err := json.MarshalIndent(threads, "", "\t")
+func ObjToJSON[T any](obj *T) ([]byte, error) {
+	b, err := json.MarshalIndent(*obj, "", "\t")
+
+	if err != nil {
+		err = errors.New("JSON Marshal failed with error: " + err.Error())
+		return nil, err
+	}
+
+	return b, nil
+}
+
+func ListToJSON[T any](list *[]T) ([]byte, error) {
+	b, err := json.MarshalIndent(*list, "", "\t")
 
 	if err != nil {
 		err = errors.New("JSON Marshal failed with error: " + err.Error())

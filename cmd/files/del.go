@@ -1,17 +1,15 @@
-package filesParse
+package files
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/jackitaliano/oait/internal/files"
+	"github.com/akamensky/argparse"
+
 	"github.com/jackitaliano/oait/internal/filter"
 	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
 	"github.com/jackitaliano/oait/internal/tui"
-
-	"github.com/akamensky/argparse"
 )
 
 type DelCommand struct {
@@ -70,7 +68,7 @@ func (d *DelCommand) Run(key string) error {
 
 	if allParsed && *d.allFlag {
 		fmt.Printf("Retrieving all files...\t\t")
-		fileObjects = files.RetrieveAllFiles(key, *d.orgArg)
+		fileObjects = openai.RetrieveAllFiles(key, *d.orgArg)
 		fileIDs = getFileIDsFromObjects(fileObjects)
 		fmt.Printf("✓\n")
 
@@ -86,7 +84,7 @@ func (d *DelCommand) Run(key string) error {
 		fmt.Printf("✓\n")
 
 		fmt.Printf("Retrieving files...\t\t")
-		fileObjects = files.RetrieveFiles(key, fileIDs, *d.orgArg)
+		fileObjects = openai.RetrieveFiles(key, fileIDs, *d.orgArg)
 		fmt.Printf("✓\n")
 	}
 
@@ -125,7 +123,7 @@ func (d *DelCommand) Run(key string) error {
 
 	if confirmed {
 		fmt.Printf("Deleting files...\t\t")
-		numDeleted := files.DeleteFiles(key, deleteFileIDs, *d.orgArg)
+		numDeleted := openai.DeleteFiles(key, deleteFileIDs, *d.orgArg)
 		fmt.Printf("✓\n")
 		fmt.Printf("Deleted %v files.\n", numDeleted)
 	} else {
@@ -202,12 +200,9 @@ func (d *DelCommand) filterFiles(args *[]argparse.Arg, fileObjects *[]openai.Fil
 
 func (d *DelCommand) getFilesOutput(args *[]argparse.Arg, filteredFileObjects *[]openai.FileObject) (*[]byte, error) {
 
-	filesOutput, err := json.MarshalIndent(*filteredFileObjects, "", "\t")
+	filesOutput, err := io.ListToJSON(filteredFileObjects)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error marshalling json: %v\n", err)
-		err := errors.New(errMsg)
-
 		return nil, err
 	}
 

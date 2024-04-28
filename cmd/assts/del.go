@@ -1,11 +1,9 @@
-package asstsParse
+package assts
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/jackitaliano/oait/internal/assts"
 	"github.com/jackitaliano/oait/internal/filter"
 	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
@@ -70,7 +68,7 @@ func (d *DelCommand) Run(key string) error {
 
 	if allParsed && *d.allFlag {
 		fmt.Printf("Retrieving all assts...\t\t")
-		asstObjects, err = assts.RetrieveAllAssts(key, *d.orgArg)
+		asstObjects, err = openai.RetrieveAllAssts(key, *d.orgArg)
 
 		if err != nil {
 			return err
@@ -90,7 +88,7 @@ func (d *DelCommand) Run(key string) error {
 		fmt.Printf("✓\n")
 
 		fmt.Printf("Retrieving assts...\t\t")
-		asstObjects = assts.RetrieveAssts(key, asstIDs, *d.orgArg)
+		asstObjects = openai.RetrieveAssts(key, asstIDs, *d.orgArg)
 		fmt.Printf("✓\n")
 	}
 
@@ -129,7 +127,7 @@ func (d *DelCommand) Run(key string) error {
 
 	if confirmed {
 		fmt.Printf("Deleting assts...\t\t")
-		numDeleted := assts.DeleteAssts(key, deleteAsstIDs, *d.orgArg)
+		numDeleted := openai.DeleteAssts(key, deleteAsstIDs, *d.orgArg)
 		fmt.Printf("✓\n")
 		fmt.Printf("Deleted %v assts.\n", numDeleted)
 	} else {
@@ -206,12 +204,9 @@ func (d *DelCommand) filterAssts(args *[]argparse.Arg, asstObjects *[]openai.Ass
 
 func (d *DelCommand) getAsstsOutput(args *[]argparse.Arg, filteredAsstObjects *[]openai.AsstObject) (*[]byte, error) {
 
-	asstsOutput, err := json.MarshalIndent(*filteredAsstObjects, "", "\t")
+	asstsOutput, err := io.ListToJSON(filteredAsstObjects)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error marshalling json: %v\n", err)
-		err := errors.New(errMsg)
-
 		return nil, err
 	}
 

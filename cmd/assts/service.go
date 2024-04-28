@@ -1,4 +1,4 @@
-package asstsParse
+package assts
 
 import (
 	"errors"

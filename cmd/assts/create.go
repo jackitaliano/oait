@@ -1,11 +1,9 @@
-package asstsParse
+package assts
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/jackitaliano/oait/internal/assts"
 	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
 	"github.com/jackitaliano/oait/internal/tui"
@@ -99,7 +97,7 @@ func (c *CreateCommand) Run(key string) error {
 
 	if confirmed {
 		fmt.Printf("Creating assistant...\t\t")
-		asstObject, err := assts.CreateAssistant(key, createdAsst, *c.orgArg)
+		asstObject, err := openai.CreateAssistant(key, createdAsst, *c.orgArg)
 
 		if err != nil {
 			fmt.Printf("X\n")
@@ -174,12 +172,9 @@ func (c *CreateCommand) getCreatedAssistant(args *[]argparse.Arg) (*openai.Creat
 
 func (c *CreateCommand) getCreatedAsstOutput(args *[]argparse.Arg, asstObject *openai.CreatedAssistant) (*[]byte, error) {
 
-	asstsOutput, err := json.MarshalIndent(*asstObject, "", "\t")
+	asstsOutput, err := io.ObjToJSON(asstObject)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error marshalling json: %v\n", err)
-		err := errors.New(errMsg)
-
 		return nil, err
 	}
 
@@ -188,12 +183,9 @@ func (c *CreateCommand) getCreatedAsstOutput(args *[]argparse.Arg, asstObject *o
 
 func (c *CreateCommand) getAsstOutput(args *[]argparse.Arg, asstObject *openai.AsstObject) (*[]byte, error) {
 
-	asstsOutput, err := json.MarshalIndent(*asstObject, "", "\t")
+	asstsOutput, err := io.ObjToJSON(asstObject)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error marshalling json: %v\n", err)
-		err := errors.New(errMsg)
-
 		return nil, err
 	}
 

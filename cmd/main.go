@@ -6,10 +6,10 @@ import (
 
 	"github.com/akamensky/argparse"
 
-	"github.com/jackitaliano/oait/cmd/asstsParse"
-	"github.com/jackitaliano/oait/cmd/filesParse"
-	"github.com/jackitaliano/oait/cmd/imagesParse"
-	"github.com/jackitaliano/oait/cmd/threadsParse"
+	"github.com/jackitaliano/oait/cmd/assts"
+	"github.com/jackitaliano/oait/cmd/files"
+	"github.com/jackitaliano/oait/cmd/images"
+	"github.com/jackitaliano/oait/cmd/threads"
 )
 
 func main() {
@@ -22,10 +22,10 @@ func main() {
 		Help:     "OpenAI API Key (default to env var 'OPENAI_API_KEY')",
 	})
 
-	threadsService := threadsParse.NewService(parser)
-	filesService := filesParse.NewService(parser)
-	asstsService := asstsParse.NewService(parser)
-	imagesService := imagesParse.NewService(parser)
+	threadsService := threads.NewService(parser)
+	filesService := files.NewService(parser)
+	asstsService := assts.NewService(parser)
+	imagesService := images.NewService(parser)
 
 	err := parser.Parse(os.Args)
 	if err != nil {

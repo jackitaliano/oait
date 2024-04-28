@@ -1,14 +1,12 @@
-package threadsParse
+package threads
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/jackitaliano/oait/internal/filter"
 	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
-	"github.com/jackitaliano/oait/internal/threads"
 
 	"github.com/akamensky/argparse"
 )
@@ -83,7 +81,7 @@ func (g *GetCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Retrieving threads...\t\t")
-	rawThreads := threads.RetrieveThreads(key, threadIDs, *g.orgArg)
+	rawThreads := openai.RetrieveThreads(key, threadIDs, *g.orgArg)
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering threads...\t\t")
@@ -209,8 +207,8 @@ func (g *GetCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, 
 	prettyParsed := (*args)[6].GetParsed()
 
 	if prettyParsed && *(g.prettyFlag) {
-		parsedThreads := threads.ParseThreads(threadIDs, filteredThreads)
-		threadOutput, err := threads.ThreadsToJson(parsedThreads)
+		parsedThreads := io.ParseThreads(threadIDs, filteredThreads)
+		threadOutput, err := io.ListToJSON(parsedThreads)
 
 		if err != nil {
 			return nil, err
@@ -219,12 +217,9 @@ func (g *GetCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, 
 		return &threadOutput, nil
 	}
 
-	threadOutput, err := json.MarshalIndent(*filteredThreads, "", "\t")
+	threadOutput, err := io.ListToJSON(filteredThreads)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error marshalling json: %v\n", err)
-		err := errors.New(errMsg)
-
 		return nil, err
 	}
 

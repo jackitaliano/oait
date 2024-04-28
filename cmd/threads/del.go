@@ -1,14 +1,12 @@
-package threadsParse
+package threads
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/jackitaliano/oait/internal/filter"
 	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
-	"github.com/jackitaliano/oait/internal/threads"
 	"github.com/jackitaliano/oait/internal/tui"
 
 	"github.com/akamensky/argparse"
@@ -83,7 +81,7 @@ func (d *DelCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Retrieving threads...\t\t")
-	rawThreads := threads.RetrieveThreads(key, threadIDs, *d.orgArg)
+	rawThreads := openai.RetrieveThreads(key, threadIDs, *d.orgArg)
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering threads...\t\t")
@@ -122,7 +120,7 @@ func (d *DelCommand) Run(key string) error {
 
 	if confirmed {
 		fmt.Printf("Deleting threads...\t\t")
-		threads.DeleteThreads(key, deleteThreadIDs, *d.orgArg)
+		openai.DeleteThreads(key, deleteThreadIDs, *d.orgArg)
 		fmt.Printf("✓\n")
 	} else {
 		fmt.Printf("Cancelled.\n")
@@ -234,12 +232,9 @@ func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, 
 	rawParsed := (*args)[6].GetParsed()
 
 	if rawParsed && *(d.rawFlag) {
-		threadOutput, err := json.MarshalIndent(*filteredThreads, "", "\t")
+		threadOutput, err := io.ListToJSON(filteredThreads)
 
 		if err != nil {
-			errMsg := fmt.Sprintf("Error marshalling json: %v\n", err)
-			err := errors.New(errMsg)
-
 			return nil, err
 		}
 
@@ -247,8 +242,8 @@ func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, 
 
 	}
 
-	parsedThreads := threads.ParseThreads(threadIDs, filteredThreads)
-	threadOutput, err := threads.ThreadsToJson(parsedThreads)
+	parsedThreads := io.ParseThreads(threadIDs, filteredThreads)
+	threadOutput, err := io.ListToJSON(parsedThreads)
 
 	if err != nil {
 		return nil, err

@@ -1,11 +1,9 @@
-package asstsParse
+package files
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/jackitaliano/oait/internal/assts"
 	"github.com/jackitaliano/oait/internal/filter"
 	"github.com/jackitaliano/oait/internal/io"
 	"github.com/jackitaliano/oait/internal/openai"
@@ -18,7 +16,7 @@ type GetCommand struct {
 	desc    string
 	command *argparse.Command
 
-	asstsArg   *[]string
+	filesArg   *[]string
 	inputArg   *string
 	allFlag    *bool
 	orgArg     *string
@@ -29,15 +27,15 @@ type GetCommand struct {
 
 func NewGetCommand(command *argparse.Command) *GetCommand {
 	const name = "get"
-	const desc = "Get Assistants Tools"
+	const desc = "Get Files Tools"
 
 	subCommand := command.NewCommand(name, desc)
 
-	asstsArg := subCommand.StringList("i", "ids", &argparse.Options{Required: false, Help: "List of Asst IDs"})
-	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "Asst Asst Input"})
-	allFlag := subCommand.Flag("A", "all", &argparse.Options{Required: false, Help: "Get all assts"})
+	filesArg := subCommand.StringList("i", "ids", &argparse.Options{Required: false, Help: "List of File IDs"})
+	inputArg := subCommand.String("f", "file-input", &argparse.Options{Required: false, Help: "File File Input"})
+	allFlag := subCommand.Flag("A", "all", &argparse.Options{Required: false, Help: "Get all files"})
 	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization ID"})
-	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "Asst File Output"})
+	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "File File Output"})
 	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
 	timeGTArg := subCommand.Float("D", "Days", &argparse.Options{Required: false, Help: "Filter by GT days"})
 
@@ -45,7 +43,7 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 		name,
 		desc,
 		subCommand,
-		asstsArg,
+		filesArg,
 		inputArg,
 		allFlag,
 		orgArg,
@@ -64,23 +62,17 @@ func (g *GetCommand) Run(key string) error {
 	args := g.command.GetArgs()
 	allParsed := args[3].GetParsed()
 
-	var asstObjects *[]openai.AsstObject
-	var err error
+	var fileObjects *[]openai.FileObject
 
 	if allParsed && *g.allFlag {
-		fmt.Printf("Retrieving all assts...\t\t")
-		asstObjects, err = assts.RetrieveAllAssts(key, *g.orgArg)
-
-		if err != nil {
-			return err
-		}
-
+		fmt.Printf("Retrieving all files...\t\t")
+		fileObjects = openai.RetrieveAllFiles(key, *g.orgArg)
 		fmt.Printf("✓\n")
 
 	} else {
 
-		fmt.Printf("Retrieving asst ids...\t")
-		asstIDs, err := g.getAsstIDs(&args)
+		fmt.Printf("Retrieving file ids...\t")
+		fileIDs, err := g.getFileIDs(&args)
 
 		if err != nil {
 			fmt.Printf("X\n")
@@ -88,13 +80,13 @@ func (g *GetCommand) Run(key string) error {
 		}
 		fmt.Printf("✓\n")
 
-		fmt.Printf("Retrieving assts...\t\t")
-		asstObjects = assts.RetrieveAssts(key, asstIDs, *g.orgArg)
+		fmt.Printf("Retrieving files...\t\t")
+		fileObjects = openai.RetrieveFiles(key, fileIDs, *g.orgArg)
 		fmt.Printf("✓\n")
 	}
 
-	fmt.Printf("Filtering assts...\t\t")
-	filteredAsstObjects, err := g.filterAssts(&args, asstObjects)
+	fmt.Printf("Filtering files...\t\t")
+	filteredFileObjects, err := g.filterFiles(&args, fileObjects)
 
 	if err != nil {
 		fmt.Printf("X\n")
@@ -102,8 +94,8 @@ func (g *GetCommand) Run(key string) error {
 	}
 	fmt.Printf("✓\n")
 
-	fmt.Printf("Formatting assts output...\t")
-	asstsOutput, err := g.getAsstsOutput(&args, filteredAsstObjects)
+	fmt.Printf("Formatting files output...\t")
+	filesOutput, err := g.getFilesOutput(&args, filteredFileObjects)
 
 	if err != nil {
 		fmt.Printf("X\n")
@@ -111,8 +103,8 @@ func (g *GetCommand) Run(key string) error {
 	}
 	fmt.Printf("✓\n")
 
-	fmt.Printf("Outputting assts... \n\n")
-	err = g.outputAssts(&args, asstsOutput)
+	fmt.Printf("Outputting files... \n\n")
+	err = g.outputFiles(&args, filesOutput)
 
 	if err != nil {
 		return err
@@ -121,29 +113,29 @@ func (g *GetCommand) Run(key string) error {
 	return nil
 }
 
-func (g *GetCommand) getAsstIDs(args *[]argparse.Arg) ([]string, error) {
-	asstsParsed := (*args)[1].GetParsed()
+func (g *GetCommand) getFileIDs(args *[]argparse.Arg) ([]string, error) {
+	filesParsed := (*args)[1].GetParsed()
 	inputParsed := (*args)[2].GetParsed()
 
-	if asstsParsed { // List passed
-		asstIDs, err := io.ListInput(*g.asstsArg)
+	if filesParsed { // List passed
+		fileIDs, err := io.ListInput(*g.filesArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return asstIDs, nil
+		return fileIDs, nil
 
 	}
 
-	if inputParsed { // Asst input passed
-		asstIDs, err := io.FileInput(*g.inputArg)
+	if inputParsed { // File input passed
+		fileIDs, err := io.FileInput(*g.inputArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return asstIDs, nil
+		return fileIDs, nil
 	}
 
 	errMsg := fmt.Sprintf("No input options passed to `%v`\n", g.name)
@@ -152,12 +144,12 @@ func (g *GetCommand) getAsstIDs(args *[]argparse.Arg) ([]string, error) {
 	return nil, err
 }
 
-func (g *GetCommand) filterAssts(args *[]argparse.Arg, asstObjects *[]openai.AsstObject) (*[]openai.AsstObject, error) {
+func (g *GetCommand) filterFiles(args *[]argparse.Arg, fileObjects *[]openai.FileObject) (*[]openai.FileObject, error) {
 	timeLTEParsed := (*args)[6].GetParsed()
 	timeGTParsed := (*args)[7].GetParsed()
 
 	if timeLTEParsed {
-		filtered, err := filter.DaysLTE(asstObjects, *g.timeLTEArg)
+		filtered, err := filter.DaysLTE(fileObjects, *g.timeLTEArg)
 
 		if err != nil {
 			return nil, err
@@ -166,7 +158,7 @@ func (g *GetCommand) filterAssts(args *[]argparse.Arg, asstObjects *[]openai.Ass
 		return filtered, nil
 
 	} else if timeGTParsed {
-		filtered, err := filter.DaysGT(asstObjects, *g.timeGTArg)
+		filtered, err := filter.DaysGT(fileObjects, *g.timeGTArg)
 
 		if err != nil {
 			return nil, err
@@ -175,24 +167,21 @@ func (g *GetCommand) filterAssts(args *[]argparse.Arg, asstObjects *[]openai.Ass
 		return filtered, nil
 	}
 
-	return asstObjects, nil
+	return fileObjects, nil
 }
 
-func (g *GetCommand) getAsstsOutput(args *[]argparse.Arg, filteredAsstObjects *[]openai.AsstObject) (*[]byte, error) {
+func (g *GetCommand) getFilesOutput(args *[]argparse.Arg, filteredFileObjects *[]openai.FileObject) (*[]byte, error) {
 
-	asstsOutput, err := json.MarshalIndent(*filteredAsstObjects, "", "\t")
+	filesOutput, err := io.ListToJSON(filteredFileObjects)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error marshalling json: %v\n", err)
-		err := errors.New(errMsg)
-
 		return nil, err
 	}
 
-	return &asstsOutput, nil
+	return &filesOutput, nil
 }
 
-func (g *GetCommand) outputAssts(args *[]argparse.Arg, output *[]byte) error {
+func (g *GetCommand) outputFiles(args *[]argparse.Arg, output *[]byte) error {
 	outputParsed := (*args)[5].GetParsed()
 
 	if outputParsed {

@@ -1,4 +1,4 @@
-package filesParse
+package files
 
 import (
 	"errors"

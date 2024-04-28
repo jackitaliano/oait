@@ -1,4 +1,4 @@
-package imagesParse
+package images
 
 import (
 	"errors"

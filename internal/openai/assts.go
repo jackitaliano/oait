@@ -1,213 +1,84 @@
 package openai
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
-
-	"github.com/jackitaliano/oait/internal/request"
 )
 
-type Property struct {
-	Type        string `json:"string"`
-	Description string `json:"description"`
-}
+func retrieveAsst(c chan AsstObject, key string, fileID string, orgID string) {
 
-type FunctionParameters struct {
-	Type       string              `json:"type"`
-	Properties map[string]Property `json:"properties"`
-	Required   []string            `json:"required"`
-}
-
-type Function struct {
-	Name        string             `json:"name"`
-	Description string             `json:"description"`
-	Parameters  FunctionParameters `json:"parameters"`
-}
-
-type Tool struct {
-	Type     string   `json:"type"`
-	Function Function `json:"function,omitempty"`
-}
-
-type AsstObject struct {
-	ID            string                         `json:"id"`
-	Object        string                         `json:"object"`
-	Created       int64                          `json:"created_at"`
-	Name          string                         `json:"name"`
-	Description   string                         `json:"description"`
-	Instructions  string                         `json:"instructions"`
-	Model         string                         `json:"model"`
-	Tools         []Tool                         `json:"tools"`
-	ToolResources map[string]map[string][]string `json:"tool_resources,omitempty"`
-	ResFormat     string                         `json:"response_format"`
-	Temp          float64                        `json:"temperature"`
-	TopP          float64                        `json:"top_p"`
-}
-
-func (a AsstObject) CreatedAt() int64 {
-	return a.Created
-}
-
-type AsstObjectsResponse struct {
-	Data   []AsstObject `json:"data"`
-	Object string       `json:"object"`
-}
-
-func (a AsstObjectsResponse) Len() int {
-	return len(a.Data)
-}
-
-type CreatedAssistant struct {
-	Name          string              `json:"name,omitempty"`
-	Description   string              `json:"description,omitempty"`
-	Instructions  string              `json:"instructions,omitempty"`
-	Model         string              `json:"model"`
-	Tools         []Tool              `json:"tools,omitempty"`
-	ToolResources map[string][]string `json:"tool_resources,omitempty"`
-	ResFormat     string              `json:"response_format,omitempty"`
-	Temp          float64             `json:"temperature,omitempty"`
-	TopP          float64             `json:"top_p,omitempty"`
-}
-
-type AsstDeleteResponse struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Deleted bool   `json:"deleted"`
-}
-
-func GetAsstObject(key string, asstID string, orgID string) (*AsstObject, error) {
-	url := fmt.Sprintf("https://api.openai.com/v1/assistants/%v", asstID)
-
-	method := "GET"
-	var reqBody io.Reader = nil
-
-	req, err := http.NewRequest(method, url, reqBody)
+	asstObject, err := GetAsstObject(key, fileID, orgID)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error creating request to '%v':\nError: %v", url, err)
-		err = errors.New(errMsg)
-		return nil, err
+		fmt.Println(err)
+		c <- AsstObject{}
+		return
 	}
 
-	req.Header.Set("Authorization", "Bearer "+key)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Openai-Beta", "assistants=v2")
+	c <- *asstObject
+}
 
-	if orgID != "" {
-		req.Header.Set("Openai-Organization", orgID)
+func RetrieveAssts(key string, threadIDs []string, orgID string) *[]AsstObject {
+	c := make(chan AsstObject, len(threadIDs))
+
+	for _, threadID := range threadIDs {
+		go retrieveAsst(c, key, threadID, orgID)
 	}
 
-	resBody, err := request.Process[AsstObject](req)
+	files := make([]AsstObject, len(threadIDs))
+	for i := range files {
+		files[i] = <-c
+	}
+
+	return &files
+}
+
+func RetrieveAllAssts(key string, orgID string) (*[]AsstObject, error) {
+	files, err := GetAllAsstObjects(key, orgID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return resBody, nil
+	return &files.Data, nil
 }
 
-func GetAllAsstObjects(key string, orgID string) (*AsstObjectsResponse, error) {
-	var url string
+func deleteAsst(c chan *AsstDeleteResponse, key string, asstID string, orgID string) {
 
-	url = "https://api.openai.com/v1/assistants?limit=100"
-
-	method := "GET"
-	var reqBody io.Reader = nil
-
-	req, err := http.NewRequest(method, url, reqBody)
+	deleteResponse, err := DeleteAsst(key, asstID, orgID)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error creating request to '%v':\nError: %v", url, err)
-		err = errors.New(errMsg)
-		return nil, err
+		fmt.Println(err)
+		c <- nil
+		return
 	}
 
-	req.Header.Set("Authorization", "Bearer "+key)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Openai-Beta", "assistants=v2")
-
-	if orgID != "" {
-		req.Header.Set("Openai-Organization", orgID)
-	}
-
-	resBody, err := request.Process[AsstObjectsResponse](req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return resBody, nil
+	c <- deleteResponse
 }
 
-func CreateAssistant(key string, asst *CreatedAssistant, orgID string) (*AsstObject, error) {
-	var url string
+func DeleteAssts(key string, fileIDs []string, orgID string) int {
+	c := make(chan *AsstDeleteResponse, len(fileIDs))
 
-	url = "https://api.openai.com/v1/assistants"
-
-	method := "POST"
-	jsonData, err := json.Marshal(*asst)
-	if err != nil {
-		return nil, err
+	for _, threadID := range fileIDs {
+		go deleteAsst(c, key, threadID, orgID)
 	}
 
-	reqBody := bytes.NewReader(jsonData)
+	results := make([]*AsstDeleteResponse, len(fileIDs))
+	numDeleted := 0
 
-	req, err := http.NewRequest(method, url, reqBody)
+	for i := range results {
+		res := <-c
+		results[i] = res
 
-	if err != nil {
-		errMsg := fmt.Sprintf("Error creating request to '%v':\nError: %v", url, err)
-		err = errors.New(errMsg)
-		return nil, err
+		if res.Deleted {
+			numDeleted += 1
+		}
 	}
 
-	req.Header.Set("Authorization", "Bearer "+key)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Openai-Beta", "assistants=v2")
-
-	if orgID != "" {
-		req.Header.Set("Openai-Organization", orgID)
-	}
-
-	resBody, err := request.Process[AsstObject](req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return resBody, nil
+	return numDeleted
 }
 
-func DeleteAsst(key string, asstID string, orgID string) (*AsstDeleteResponse, error) {
-	url := fmt.Sprintf("https://api.openai.com/v1/assistants/%v", asstID)
+func CreateAssistant(key string, createdAsst *CreatedAssistant, orgID string) (*AsstObject, error) {
+	asst, err := NewAssistant(key, createdAsst, orgID)
 
-	method := "DELETE"
-	var reqBody io.Reader = nil
-
-	req, err := http.NewRequest(method, url, reqBody)
-
-	if err != nil {
-		errMsg := fmt.Sprintf("Error creating request to '%v':\nError: %v", url, err)
-		err = errors.New(errMsg)
-		return nil, err
-	}
-
-	req.Header.Set("Authorization", "Bearer "+key)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Openai-Beta", "assistants=v2")
-
-	if orgID != "" {
-		req.Header.Set("Openai-Organization", orgID)
-	}
-
-	resBody, err := request.Process[AsstDeleteResponse](req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return resBody, nil
+	return asst, err
 }
