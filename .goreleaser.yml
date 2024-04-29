@@ -1,5 +1,7 @@
 builds:
-  - binary: "oait"
+  - id: "oait"
+    main: "./cmd/main.go"
+    binary: "oait"
     goos:
       - darwin
       - linux
@@ -19,7 +21,7 @@ brews:
   -
     name: oait
     homepage: https://github.com/jackitaliano/oait
-    tap:
+    repository:
       owner: jackitaliano
       name: homebrew-tap
     commit_author:
