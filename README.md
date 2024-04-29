@@ -9,7 +9,11 @@ Mainly for developer use to access OpenAI API endpoints via CLI easily. Helps au
 2. `go install github.com/jackitaliano/oait@latest`
 
 ## Homebrew
+### Https auth:
 1. `brew tap jackitaliano/tap`
+2. `brew install oait`
+### SSH auth:
+1. `brew tap --custom-remote jackitaliano/tap git@github.com:jackitaliano/homebrew-tap`
 2. `brew install oait`
 
 # API Support
