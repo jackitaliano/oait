@@ -1,0 +1,29 @@
+builds:
+  - binary: "oait"
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch: 
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    # flags:
+    #   - -m=vendor
+releases:
+  prereleases: auto
+
+universal_vinaries:
+  - replace: true
+
+brews:
+  -
+    name: oait
+    homepage: https://github.com/jackitaliano/oait
+    tap:
+      owner: jackitaliano
+      name: homebrew-tap
+    commit_author:
+      name: jackitaliano
+      email: italiano.16@osu.edu
