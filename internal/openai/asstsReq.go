@@ -51,7 +51,7 @@ type CreatedAssistant struct {
 
 type Tool struct {
 	Type     string   `json:"type"`
-	Function Function `json:"function,omitempty"`
+	Function *Function `json:"function,omitempty"`
 }
 
 type Function struct {

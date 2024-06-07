@@ -40,7 +40,7 @@ func ParseThreads(threadIDs []string, threads *[]openai.Messages) *[]Thread {
 }
 
 func ObjToJSON[T any](obj *T) ([]byte, error) {
-	b, err := json.MarshalIndent(*obj, "", "\t")
+	b, err := json.MarshalIndent(*obj, "", "  ")
 
 	if err != nil {
 		err = errors.New("JSON Marshal failed with error: " + err.Error())
@@ -51,7 +51,7 @@ func ObjToJSON[T any](obj *T) ([]byte, error) {
 }
 
 func ListToJSON[T any](list *[]T) ([]byte, error) {
-	b, err := json.MarshalIndent(*list, "", "\t")
+	b, err := json.MarshalIndent(*list, "", "  ")
 
 	if err != nil {
 		err = errors.New("JSON Marshal failed with error: " + err.Error())
