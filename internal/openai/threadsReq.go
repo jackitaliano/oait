@@ -44,11 +44,17 @@ type Message struct {
 	ID          string           `json:"id"`
 	Object      string           `json:"object"`
 	CreatedAt   int64            `json:"created_at"`
-	AssistantID string           `json:"assistant_id"`
+	AssistantID string           `json:"assistant_id,omitempty"`
 	ThreadID    string           `json:"thread_id"`
-	RunID       string           `json:"run_id"`
+	RunID       string           `json:"run_id,omitempty"`
 	Role        string           `json:"role"`
 	Content     []MessageContent `json:"content"`
+	Attachments []Attachment     `json:"attachments,omitempty"`
+}
+
+type Attachment struct {
+	FileId string `json:"file_id"`
+	Tools   []Tool `json:"tools"` // defined in asstReq.go
 }
 
 type MessageContent struct {
@@ -58,7 +64,7 @@ type MessageContent struct {
 
 type MessageText struct {
 	Value       string       `json:"value"`
-	Annotations []Annotation `json:"annotations"`
+	Annotations []Annotation `json:"annotations,omitempty"`
 }
 
 type CreatedMessage struct {
