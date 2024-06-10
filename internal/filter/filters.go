@@ -2,15 +2,20 @@ package filter
 
 import (
 	"errors"
+	"strings"
 	"time"
 )
 
 type CreatedAtProvider interface {
-	CreatedAt() int64
+	GetCreatedAt() int64
 }
 
 type LenProvider interface {
-	Len() int
+	GetLen() int
+}
+
+type NameProvider interface {
+	GetName() string
 }
 
 func DaysLTE[T CreatedAtProvider](list *[]T, days float64) (*[]T, error) {
@@ -30,7 +35,7 @@ func DaysLTE[T CreatedAtProvider](list *[]T, days float64) (*[]T, error) {
 	unixTimeXDaysAgo := unixTime - int64(daysInSeconds)
 
 	for _, obj := range *list {
-		if unixTimeXDaysAgo <= obj.CreatedAt() {
+		if unixTimeXDaysAgo <= obj.GetCreatedAt() {
 			filtered = append(filtered, obj)
 		}
 	}
@@ -54,7 +59,7 @@ func DaysGT[T CreatedAtProvider](list *[]T, days float64) (*[]T, error) {
 	unixTimeXDaysAgo := unixTime - int64(daysInSeconds)
 
 	for _, obj := range *list {
-		if unixTimeXDaysAgo > obj.CreatedAt() {
+		if unixTimeXDaysAgo > obj.GetCreatedAt() {
 			filtered = append(filtered, obj)
 		}
 	}
@@ -71,7 +76,7 @@ func LengthLTE[T LenProvider](list *[]T, length float64) (*[]T, error) {
 	filtered := []T{}
 
 	for _, obj := range *list {
-		if float64(obj.Len()) <= length {
+		if float64(obj.GetLen()) <= length {
 			filtered = append(filtered, obj)
 		}
 	}
@@ -88,10 +93,54 @@ func LengthGT[T LenProvider](list *[]T, length float64) (*[]T, error) {
 	filtered := []T{}
 
 	for _, obj := range *list {
-		if float64(obj.Len()) > length {
+		if float64(obj.GetLen()) > length {
 			filtered = append(filtered, obj)
 		}
 	}
 
 	return &filtered, nil
+}
+
+func ContainsName[T NameProvider](list *[]T, names []string) (*[]T) {
+	filtered := []T{}
+
+	for _, obj := range *list {
+		
+		contains := true;
+		for _, name := range names {
+			if !strings.Contains(obj.GetName(), name) {
+				contains = false;
+				break;
+			} 
+		}
+
+		if contains {
+			filtered = append(filtered, obj)
+		}
+	}
+
+	return &filtered
+
+}
+
+func NotContainsName[T NameProvider](list *[]T, names []string) (*[]T) {
+	filtered := []T{}
+
+	for _, obj := range *list {
+		contains := false;
+
+		for _, name := range names {
+			if (strings.Contains(obj.GetName(), name)) {
+				contains = true;
+				break;
+			}
+		}
+
+		if (!contains) {
+			filtered = append(filtered, obj)
+		}
+	}
+
+	return &filtered
+
 }

@@ -25,7 +25,7 @@ type AsstDeleteResponse struct {
 type AsstObject struct {
 	ID            string                         `json:"id"`
 	Object        string                         `json:"object"`
-	Created       int64                          `json:"created_at"`
+	CreatedAt     int64                          `json:"created_at"`
 	Name          string                         `json:"name"`
 	Description   string                         `json:"description"`
 	Instructions  string                         `json:"instructions"`
@@ -50,7 +50,7 @@ type CreatedAssistant struct {
 }
 
 type Tool struct {
-	Type     string   `json:"type"`
+	Type     string    `json:"type"`
 	Function *Function `json:"function,omitempty"`
 }
 
@@ -71,11 +71,15 @@ type Property struct {
 	Description string `json:"description"`
 }
 
-func (a AsstObject) CreatedAt() int64 {
-	return a.Created
+func (a AsstObject) GetCreatedAt() int64 {
+	return a.CreatedAt
 }
 
-func (a AsstObjectsResponse) Len() int {
+func (a AsstObject) GetName() string {
+	return a.Name
+}
+
+func (a AsstObjectsResponse) GetLen() int {
 	return len(a.Data)
 }
 

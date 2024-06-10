@@ -23,6 +23,8 @@ type GetCommand struct {
 	outputArg  *string
 	timeLTEArg *float64
 	timeGTArg  *float64
+	nameContainsArg    *[]string
+	nameNotContainsArg *[]string
 }
 
 func NewGetCommand(command *argparse.Command) *GetCommand {
@@ -38,6 +40,8 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "File File Output"})
 	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
 	timeGTArg := subCommand.Float("D", "Days", &argparse.Options{Required: false, Help: "Filter by GT days"})
+	nameContainsArg := subCommand.StringList("n", "name", &argparse.Options{Required: false, Help: "Filter by File containing name"})
+	nameNotContainsArg := subCommand.StringList("N", "Name", &argparse.Options{Required: false, Help: "Filter by File not containing name"})
 
 	return &GetCommand{
 		name,
@@ -50,6 +54,8 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 		outputArg,
 		timeLTEArg,
 		timeGTArg,
+		nameContainsArg,
+		nameNotContainsArg,
 	}
 }
 
@@ -147,27 +153,38 @@ func (g *GetCommand) getFileIDs(args *[]argparse.Arg) ([]string, error) {
 func (g *GetCommand) filterFiles(args *[]argparse.Arg, fileObjects *[]openai.FileObject) (*[]openai.FileObject, error) {
 	timeLTEParsed := (*args)[6].GetParsed()
 	timeGTParsed := (*args)[7].GetParsed()
+	nameContainsParsed := (*args)[8].GetParsed()
+	nameNotContainsParsed := (*args)[9].GetParsed()
+
+	filtered := fileObjects
+	var err error
 
 	if timeLTEParsed {
-		filtered, err := filter.DaysLTE(fileObjects, *g.timeLTEArg)
+		filtered, err = filter.DaysLTE(filtered, *g.timeLTEArg)
 
 		if err != nil {
 			return nil, err
 		}
-
-		return filtered, nil
-
-	} else if timeGTParsed {
-		filtered, err := filter.DaysGT(fileObjects, *g.timeGTArg)
-
-		if err != nil {
-			return nil, err
-		}
-
-		return filtered, nil
 	}
 
-	return fileObjects, nil
+	if timeGTParsed {
+		filtered, err = filter.DaysGT(filtered, *g.timeGTArg)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if nameContainsParsed {
+		filtered = filter.ContainsName(filtered, *g.nameContainsArg)
+
+	}
+
+	if nameNotContainsParsed {
+		filtered = filter.NotContainsName(filtered, *g.nameNotContainsArg)
+	}
+
+	return filtered, nil
 }
 
 func (g *GetCommand) getFilesOutput(args *[]argparse.Arg, filteredFileObjects *[]openai.FileObject) (*[]byte, error) {

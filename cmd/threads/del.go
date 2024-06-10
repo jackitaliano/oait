@@ -186,46 +186,44 @@ func (d *DelCommand) filterThreads(args *[]argparse.Arg, rawThreads *[]openai.Me
 	lengthLTEParsed := (*args)[9].GetParsed()
 	lengthGTParsed := (*args)[10].GetParsed()
 
+	filtered := rawThreads
+	var err error
+
 	if timeLTEParsed {
-		filtered, err := filter.DaysLTE(rawThreads, *d.timeLTEArg)
+		filtered, err = filter.DaysLTE(rawThreads, *d.timeLTEArg)
 
 		if err != nil {
 			return nil, err
 		}
 
-		return filtered, nil
+	}
 
-	} else if timeGTParsed {
-		filtered, err := filter.DaysGT(rawThreads, *d.timeGTArg)
+	if timeGTParsed {
+		filtered, err = filter.DaysGT(rawThreads, *d.timeGTArg)
 
 		if err != nil {
 			return nil, err
 		}
-
-		return filtered, nil
 	}
 
 	// Filter length flow
 	if lengthLTEParsed {
-		filtered, err := filter.LengthLTE(rawThreads, *d.lengthLTEArg)
+		filtered, err = filter.LengthLTE(rawThreads, *d.lengthLTEArg)
 
 		if err != nil {
 			return nil, err
 		}
-
-		return filtered, nil
-
-	} else if lengthGTParsed {
-		filtered, err := filter.LengthGT(rawThreads, *d.lengthGTArg)
-
-		if err != nil {
-			return nil, err
-		}
-
-		return filtered, nil
 	}
 
-	return rawThreads, nil
+	if lengthGTParsed {
+		filtered, err = filter.LengthGT(rawThreads, *d.lengthGTArg)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return filtered, nil
 }
 
 func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, filteredThreads *[]openai.Messages) (*[]byte, error) {
@@ -273,7 +271,7 @@ func getThreadIDsFromObjects(threads *[]openai.Messages) []string {
 	threadIDs := []string{}
 
 	for _, thread := range *threads {
-		if thread.Len() > 0 {
+		if thread.GetLen() > 0 {
 			threadIDs = append(threadIDs, thread.Messages[0].ID)
 		}
 	}

@@ -88,14 +88,14 @@ type FilePath struct {
 	FileID string `json:"file_id"`
 }
 
-func (m Messages) CreatedAt() int64 {
-	if m.Len() > 0 {
+func (m Messages) GetCreatedAt() int64 {
+	if m.GetLen() > 0 {
 		return m.Messages[0].CreatedAt
 	}
 	return 0
 }
 
-func (m Messages) Len() int {
+func (m Messages) GetLen() int {
 	return len(m.Messages)
 }
 

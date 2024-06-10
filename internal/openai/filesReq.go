@@ -29,7 +29,12 @@ type FileObject struct {
 	Purpose  string `json:"purpose"`
 }
 
-func (f FileObject) CreatedAt() int64 {
+
+func (f FileObject) GetName() string {
+	return f.Filename
+}
+
+func (f FileObject) GetCreatedAt() int64 {
 	return f.Created
 }
 
