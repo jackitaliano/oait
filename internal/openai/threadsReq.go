@@ -54,17 +54,22 @@ type Message struct {
 
 type Attachment struct {
 	FileId string `json:"file_id"`
-	Tools   []Tool `json:"tools"` // defined in asstReq.go
+	Tools  []Tool `json:"tools"` // defined in asstReq.go
 }
 
 type MessageContent struct {
-	Type string      `json:"type"`
-	Text MessageText `json:"text"`
+	Type      string       `json:"type"`
+	Text      *MessageText `json:"text,omitempty"`
+	ImageFile *ImageFile   `json:"image_file,omitempty"`
 }
 
 type MessageText struct {
 	Value       string       `json:"value"`
 	Annotations []Annotation `json:"annotations,omitempty"`
+}
+
+type ImageFile struct {
+	FileId string `json:"file_id,omitempty"`
 }
 
 type CreatedMessage struct {
