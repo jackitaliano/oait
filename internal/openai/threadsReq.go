@@ -99,6 +99,24 @@ func (m Messages) GetLen() int {
 	return len(m.Messages)
 }
 
+func (m Messages) GetContent() []string {
+
+	content := make([]string, len(m.Messages))
+
+	for i, msg := range m.Messages {
+		for _, c := range msg.Content {
+			if (c.Type == "text") {
+				content[i] = c.Text.Value
+				continue;
+			} else {
+				content[i] = ""
+			}
+		}
+	}
+
+	return content
+}
+
 func GetThreadMessages(key string, threadID string, orgID string) (*MessagesResponse, error) {
 	url := fmt.Sprintf("https://api.openai.com/v1/threads/%v/messages?limit=100", threadID)
 	method := "GET"

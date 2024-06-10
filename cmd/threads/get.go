@@ -26,6 +26,8 @@ type GetCommand struct {
 	timeGTArg    *float64
 	lengthLTEArg *float64
 	lengthGTArg  *float64
+	contentContainsArg *[]string
+	contentNotContainsArg *[]string
 }
 
 func NewGetCommand(command *argparse.Command) *GetCommand {
@@ -44,6 +46,8 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 	timeGTArg := subCommand.Float("D", "Days", &argparse.Options{Required: false, Help: "Filter by GT days"})
 	lengthLTEArg := subCommand.Float("l", "length", &argparse.Options{Required: false, Help: "Filter by LTE to length"})
 	lengthGTArg := subCommand.Float("L", "Length", &argparse.Options{Required: false, Help: "Filter by GT length"})
+	contentContainsArg := subCommand.StringList("c", "content", &argparse.Options{Required: false, Help: "Filter by thread content contains"})
+	contentNotContainsArg := subCommand.StringList("C", "Content", &argparse.Options{Required: false, Help: "Filter by thread content not contains"})
 
 	return &GetCommand{
 		name,
@@ -59,6 +63,8 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 		timeGTArg,
 		lengthLTEArg,
 		lengthGTArg,
+		contentContainsArg,
+		contentNotContainsArg,
 	}
 }
 
@@ -160,12 +166,14 @@ func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[]openai.Me
 	timeGTParsed := (*args)[8].GetParsed()
 	lengthLTEParsed := (*args)[9].GetParsed()
 	lengthGTParsed := (*args)[10].GetParsed()
+	contentContainsParsed := (*args)[11].GetParsed()
+	contentNotContainsParsed := (*args)[12].GetParsed()
 
 	filtered := rawThreads
 	var err error
 
 	if timeLTEParsed {
-		filtered, err = filter.DaysLTE(rawThreads, *g.timeLTEArg)
+		filtered, err = filter.DaysLTE(filtered, *g.timeLTEArg)
 
 		if err != nil {
 			return nil, err
@@ -174,7 +182,7 @@ func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[]openai.Me
 	}
 
 	if timeGTParsed {
-		filtered, err = filter.DaysGT(rawThreads, *g.timeGTArg)
+		filtered, err = filter.DaysGT(filtered, *g.timeGTArg)
 
 		if err != nil {
 			return nil, err
@@ -183,7 +191,7 @@ func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[]openai.Me
 
 	// Filter length flow
 	if lengthLTEParsed {
-		filtered, err = filter.LengthLTE(rawThreads, *g.lengthLTEArg)
+		filtered, err = filter.LengthLTE(filtered, *g.lengthLTEArg)
 
 		if err != nil {
 			return nil, err
@@ -191,11 +199,19 @@ func (g *GetCommand) filterThreads(args *[]argparse.Arg, rawThreads *[]openai.Me
 	}
 
 	if lengthGTParsed {
-		filtered, err = filter.LengthGT(rawThreads, *g.lengthGTArg)
+		filtered, err = filter.LengthGT(filtered, *g.lengthGTArg)
 
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	if contentContainsParsed {
+		filtered = filter.ContainsContent(filtered, *g.contentContainsArg)
+	}
+
+	if contentNotContainsParsed {
+		filtered = filter.NotContainsContent(filtered, *g.contentNotContainsArg)
 	}
 
 	return filtered, nil

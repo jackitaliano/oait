@@ -18,6 +18,10 @@ type NameProvider interface {
 	GetName() string
 }
 
+type ContentProvider interface {
+	GetContent() []string
+}
+
 func DaysLTE[T CreatedAtProvider](list *[]T, days float64) (*[]T, error) {
 
 	if days < 0 {
@@ -101,17 +105,17 @@ func LengthGT[T LenProvider](list *[]T, length float64) (*[]T, error) {
 	return &filtered, nil
 }
 
-func ContainsName[T NameProvider](list *[]T, names []string) (*[]T) {
+func ContainsName[T NameProvider](list *[]T, names []string) *[]T {
 	filtered := []T{}
 
 	for _, obj := range *list {
-		
-		contains := true;
+
+		contains := true
 		for _, name := range names {
 			if !strings.Contains(obj.GetName(), name) {
-				contains = false;
-				break;
-			} 
+				contains = false
+				break
+			}
 		}
 
 		if contains {
@@ -123,24 +127,79 @@ func ContainsName[T NameProvider](list *[]T, names []string) (*[]T) {
 
 }
 
-func NotContainsName[T NameProvider](list *[]T, names []string) (*[]T) {
+func NotContainsName[T NameProvider](list *[]T, names []string) *[]T {
 	filtered := []T{}
 
 	for _, obj := range *list {
-		contains := false;
+		contains := false
 
 		for _, name := range names {
-			if (strings.Contains(obj.GetName(), name)) {
-				contains = true;
-				break;
+			if strings.Contains(obj.GetName(), name) {
+				contains = true
+				break
 			}
 		}
 
-		if (!contains) {
+		if !contains {
 			filtered = append(filtered, obj)
 		}
 	}
 
 	return &filtered
 
+}
+
+func ContainsContent[T ContentProvider](list *[]T, contents []string) *[]T {
+	filtered := []T{}
+
+	for _, obj := range *list {
+		contains := true
+
+		for _, c := range contents {
+			msgContains := false
+
+			for _, msgContents := range obj.GetContent() {
+				if strings.Contains(msgContents, c) {
+					msgContains = true
+					break
+				}
+			}
+
+			contains = contains && msgContains
+		}
+
+		if contains {
+			filtered = append(filtered, obj)
+		}
+	}
+
+	return &filtered
+
+}
+
+func NotContainsContent[T ContentProvider](list *[]T, contents []string) *[]T {
+	filtered := []T{}
+
+	for _, obj := range *list {
+		contains := false
+
+		for _, c := range contents {
+			msgContains := false
+
+			for _, msgContents := range obj.GetContent() {
+				if strings.Contains(msgContents, c) {
+					msgContains = true
+					break
+				}
+			}
+
+			contains = contains || msgContains
+		}
+
+		if !contains {
+			filtered = append(filtered, obj)
+		}
+	}
+
+	return &filtered
 }
