@@ -3,6 +3,7 @@ package threads
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/jackitaliano/oait/internal/filter"
 	"github.com/jackitaliano/oait/internal/io"
@@ -29,6 +30,7 @@ type DelCommand struct {
 	lengthGTArg  *float64
 	contentContainsArg *[]string
 	contentNotContainsArg *[]string
+	metadataArg *[]string
 }
 
 func NewDelCommand(command *argparse.Command) *DelCommand {
@@ -49,6 +51,7 @@ func NewDelCommand(command *argparse.Command) *DelCommand {
 	lengthGTArg := subCommand.Float("L", "Length", &argparse.Options{Required: false, Help: "Filter by GT length"})
 	contentContainsArg := subCommand.StringList("c", "content", &argparse.Options{Required: false, Help: "Filter by thread content contains"})
 	contentNotContainsArg := subCommand.StringList("C", "Content", &argparse.Options{Required: false, Help: "Filter by thread content not contains"})
+	metadataArg := subCommand.StringList("m", "meta", &argparse.Options{Required: false, Help: "Thread Data"})
 
 	return &DelCommand{
 		name,
@@ -66,6 +69,7 @@ func NewDelCommand(command *argparse.Command) *DelCommand {
 		lengthGTArg,
 		contentContainsArg,
 		contentNotContainsArg,
+		metadataArg,
 	}
 }
 
@@ -83,11 +87,19 @@ func (d *DelCommand) Run(key string) error {
 		fmt.Printf("X\n")
 		return err
 	}
-
 	fmt.Printf("✓\n")
 
+	fmt.Printf("Filtering thread ids...\t\t")
+	filteredThreadIDs, err := d.filterThreadsIds(&args, key, threadIDs);
+	if err != nil {
+		fmt.Printf("X\n")
+		return err
+	}
+	fmt.Printf("✓\n")
+
+
 	fmt.Printf("Retrieving threads...\t\t")
-	rawThreads := openai.RetrieveThreadsMessages(key, threadIDs, *d.orgArg)
+	rawThreads := openai.RetrieveThreadsMessages(key, filteredThreadIDs, *d.orgArg)
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering threads...\t\t")
@@ -105,7 +117,7 @@ func (d *DelCommand) Run(key string) error {
 
 	if verify {
 		fmt.Printf("Formatting thread output...\t")
-		threadsOutput, err := d.getThreadsOutput(&args, threadIDs, filteredThreads)
+		threadsOutput, err := d.getThreadsOutput(&args, filteredThreadIDs, filteredThreads)
 
 		if err != nil {
 			fmt.Printf("X\n")
@@ -184,6 +196,51 @@ func (d *DelCommand) getThreadIDs(args *[]argparse.Arg) ([]string, error) {
 	err := errors.New(errMsg)
 
 	return nil, err
+}
+
+func (d *DelCommand) filterThreadsIds(args *[]argparse.Arg, key string, threadIds []string) ([]string, error) {
+	metadataParsed := (*args)[13].GetParsed()
+
+	if !metadataParsed {
+		return threadIds, nil;
+	}
+
+	filtered := threadIds
+	var err error
+
+	threads := openai.RetrieveThreads(key, threadIds, *d.orgArg)
+
+	if metadataParsed {
+		metadata := make(map[string]string, len(*d.metadataArg))
+
+		for _, metadataStr := range *d.metadataArg {
+			metadataSplit := strings.Split(metadataStr, "=");
+
+			if len(metadataSplit) < 2 {
+				errMsg := fmt.Sprintf("invalid metadata: '%s'. (should be '<key>=<value>')", metadataStr)
+				err = errors.New(errMsg)
+				return nil, err
+			}
+
+			metadataKey := metadataSplit[0]
+			metadataVal := metadataSplit[1]
+
+			metadata[metadataKey] = metadataVal
+		}
+
+
+		filteredThreads := filter.MetadataEquals(threads, metadata)
+
+		filtered = make([]string, len(*filteredThreads))
+
+		for i, thread := range *filteredThreads {
+			id := thread.ID
+
+			filtered[i] = id
+		}
+	}
+
+	return filtered, nil
 }
 
 func (d *DelCommand) filterThreads(args *[]argparse.Arg, rawThreads *[]openai.Messages) (*[]openai.Messages, error) {
