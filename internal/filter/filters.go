@@ -22,6 +22,10 @@ type ContentProvider interface {
 	GetContent() []string
 }
 
+type MetadataProvider interface {
+	GetMetadata() map[string]string
+}
+
 func DaysLTE[T CreatedAtProvider](list *[]T, days float64) (*[]T, error) {
 
 	if days < 0 {
@@ -197,6 +201,28 @@ func NotContainsContent[T ContentProvider](list *[]T, contents []string) *[]T {
 		}
 
 		if !contains {
+			filtered = append(filtered, obj)
+		}
+	}
+
+	return &filtered
+}
+
+func MetadataEquals[T MetadataProvider](list *[]T, metadata map[string]string) *[]T {
+	filtered := []T{}
+	for _, obj := range *list {
+		threadMetadata := obj.GetMetadata()
+
+		equal := true;
+		for key, val := range metadata {
+			threadVal, ok := threadMetadata[key]
+
+			if !ok || threadVal != val {
+				equal = false
+			}
+		}
+
+		if (equal) {
 			filtered = append(filtered, obj)
 		}
 	}

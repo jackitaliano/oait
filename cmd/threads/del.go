@@ -87,7 +87,7 @@ func (d *DelCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Retrieving threads...\t\t")
-	rawThreads := openai.RetrieveThreads(key, threadIDs, *d.orgArg)
+	rawThreads := openai.RetrieveThreadsMessages(key, threadIDs, *d.orgArg)
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering threads...\t\t")

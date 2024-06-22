@@ -49,7 +49,7 @@ func DeleteThreads(key string, threadIDs []string, orgID string) int {
 	return numDeleted
 }
 
-func retrieveThread(c chan *Messages, key string, threadID string, orgID string) {
+func retrieveThreadMessages(c chan *Messages, key string, threadID string, orgID string) {
 
 	messageResponse, err := GetThreadMessages(key, threadID, orgID)
 
@@ -63,11 +63,11 @@ func retrieveThread(c chan *Messages, key string, threadID string, orgID string)
 	c <- messageData
 }
 
-func RetrieveThreads(key string, threadIDs []string, orgID string) *[]Messages {
+func RetrieveThreadsMessages(key string, threadIDs []string, orgID string) *[]Messages {
 	c := make(chan *Messages, len(threadIDs))
 
 	for _, threadID := range threadIDs {
-		go retrieveThread(c, key, threadID, orgID)
+		go retrieveThreadMessages(c, key, threadID, orgID)
 	}
 
 	results := make([]*Messages, len(threadIDs))
@@ -76,6 +76,41 @@ func RetrieveThreads(key string, threadIDs []string, orgID string) *[]Messages {
 	}
 
 	threads := []Messages{}
+	for _, thread := range results {
+		if thread != nil {
+			threads = append(threads, *thread)
+		}
+	}
+
+	return &threads
+}
+
+func retrieveThread(c chan *Thread, key string, threadID string, orgID string) {
+
+	thread, err := GetThread(key, threadID, orgID)
+
+	if err != nil {
+		fmt.Println(err)
+		c <- &Thread{}
+		return
+	}
+
+	c <- thread
+}
+
+func RetrieveThreads(key string, threadIDs []string, orgID string) *[]Thread {
+	c := make(chan *Thread, len(threadIDs))
+
+	for _, threadID := range threadIDs {
+		go retrieveThread(c, key, threadID, orgID)
+	}
+
+	results := make([]*Thread, len(threadIDs))
+	for i := range results {
+		results[i] = <-c
+	}
+
+	threads := []Thread{}
 	for _, thread := range results {
 		if thread != nil {
 			threads = append(threads, *thread)

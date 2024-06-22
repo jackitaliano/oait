@@ -31,9 +31,10 @@ type ThreadDeleteResponse struct {
 }
 
 type Thread struct {
-	Object    string `json:"object"`
-	ID        string `json:"id"`
-	CreatedAt int    `json:"created_at"`
+	Object    string            `json:"object"`
+	ID        string            `json:"id"`
+	CreatedAt int               `json:"created_at"`
+	Metadata  map[string]string `json:"metadata,omitempty"`
 }
 
 type Messages struct {
@@ -105,9 +106,9 @@ func (m Messages) GetContent() []string {
 
 	for i, msg := range m.Messages {
 		for _, c := range msg.Content {
-			if (c.Type == "text") {
+			if c.Type == "text" {
 				content[i] = c.Text.Value
-				continue;
+				continue
 			} else {
 				content[i] = ""
 			}
@@ -115,6 +116,10 @@ func (m Messages) GetContent() []string {
 	}
 
 	return content
+}
+
+func (t Thread) GetMetadata() map[string]string {
+	return t.Metadata;
 }
 
 func GetThreadMessages(key string, threadID string, orgID string) (*MessagesResponse, error) {
@@ -169,6 +174,36 @@ func GetSessionThreads(sessionID string, orgID string) (*SessionThreadsResponse,
 	}
 
 	resBody, err := request.Process[SessionThreadsResponse](req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resBody, nil
+}
+
+func GetThread(key string, threadId string, orgID string) (*Thread, error) {
+	url := fmt.Sprintf("https://api.openai.com/v1/threads/%v", threadId);
+	method := "GET"
+	var reqBody io.Reader = nil
+
+	req, err := http.NewRequest(method, url, reqBody)
+
+	if err != nil {
+		errMsg := fmt.Sprintf("Error creating request to '%v':\nError: %v", url, err)
+		err = errors.New(errMsg)
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+key)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Openai-Beta", "assistants=v1")
+
+	if orgID != "" {
+		req.Header.Set("Openai-Organization", orgID)
+	}
+
+	resBody, err := request.Process[Thread](req)
 
 	if err != nil {
 		return nil, err
