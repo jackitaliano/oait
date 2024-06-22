@@ -17,19 +17,19 @@ type GetCommand struct {
 	desc    string
 	command *argparse.Command
 
-	threadsArg   *[]string
-	inputArg     *string
-	sessionArg   *string
-	orgArg       *string
-	outputArg    *string
-	prettyFlag   *bool
-	timeLTEArg   *float64
-	timeGTArg    *float64
-	lengthLTEArg *float64
-	lengthGTArg  *float64
-	contentContainsArg *[]string
+	threadsArg            *[]string
+	inputArg              *string
+	sessionArg            *string
+	orgArg                *string
+	outputArg             *string
+	prettyFlag            *bool
+	timeLTEArg            *float64
+	timeGTArg             *float64
+	lengthLTEArg          *float64
+	lengthGTArg           *float64
+	contentContainsArg    *[]string
 	contentNotContainsArg *[]string
-	metadataArg *[]string
+	metadataArg           *[]string
 }
 
 func NewGetCommand(command *argparse.Command) *GetCommand {
@@ -50,7 +50,7 @@ func NewGetCommand(command *argparse.Command) *GetCommand {
 	lengthGTArg := subCommand.Float("L", "Length", &argparse.Options{Required: false, Help: "Filter by GT length"})
 	contentContainsArg := subCommand.StringList("c", "content", &argparse.Options{Required: false, Help: "Filter by thread content contains"})
 	contentNotContainsArg := subCommand.StringList("C", "Content", &argparse.Options{Required: false, Help: "Filter by thread content not contains"})
-	metadataArg := subCommand.StringList("m", "meta", &argparse.Options{Required: false, Help: "Thread Data"})
+	metadataArg := subCommand.StringList("m", "meta", &argparse.Options{Required: false, Help: "Filter by thread metadata"})
 
 	return &GetCommand{
 		name,
@@ -90,7 +90,7 @@ func (g *GetCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering thread ids...\t\t")
-	filteredThreadIDs, err := g.filterThreadsIds(&args, key, threadIDs);
+	filteredThreadIDs, err := g.filterThreadsIds(&args, key, threadIDs)
 	if err != nil {
 		fmt.Printf("X\n")
 		return err
@@ -176,7 +176,7 @@ func (g *GetCommand) filterThreadsIds(args *[]argparse.Arg, key string, threadId
 	metadataParsed := (*args)[13].GetParsed()
 
 	if !metadataParsed {
-		return threadIds, nil;
+		return threadIds, nil
 	}
 
 	filtered := threadIds
@@ -188,7 +188,7 @@ func (g *GetCommand) filterThreadsIds(args *[]argparse.Arg, key string, threadId
 		metadata := make(map[string]string, len(*g.metadataArg))
 
 		for _, metadataStr := range *g.metadataArg {
-			metadataSplit := strings.Split(metadataStr, "=");
+			metadataSplit := strings.Split(metadataStr, "=")
 
 			if len(metadataSplit) < 2 {
 				errMsg := fmt.Sprintf("invalid metadata: '%s'. (should be '<key>=<value>')", metadataStr)
@@ -201,7 +201,6 @@ func (g *GetCommand) filterThreadsIds(args *[]argparse.Arg, key string, threadId
 
 			metadata[metadataKey] = metadataVal
 		}
-
 
 		filteredThreads := filter.MetadataEquals(threads, metadata)
 

@@ -18,19 +18,19 @@ type DelCommand struct {
 	desc    string
 	command *argparse.Command
 
-	threadsArg   *[]string
-	inputArg     *string
-	sessionArg   *string
-	orgArg       *string
-	outputArg    *string
-	rawFlag      *bool
-	timeLTEArg   *float64
-	timeGTArg    *float64
-	lengthLTEArg *float64
-	lengthGTArg  *float64
-	contentContainsArg *[]string
+	threadsArg            *[]string
+	inputArg              *string
+	sessionArg            *string
+	orgArg                *string
+	outputArg             *string
+	prettyFlag            *bool
+	timeLTEArg            *float64
+	timeGTArg             *float64
+	lengthLTEArg          *float64
+	lengthGTArg           *float64
+	contentContainsArg    *[]string
 	contentNotContainsArg *[]string
-	metadataArg *[]string
+	metadataArg           *[]string
 }
 
 func NewDelCommand(command *argparse.Command) *DelCommand {
@@ -44,14 +44,14 @@ func NewDelCommand(command *argparse.Command) *DelCommand {
 	sessionArg := subCommand.String("s", "session", &argparse.Options{Required: false, Help: "Retrieve Threads from session-id"})
 	orgArg := subCommand.String("O", "org", &argparse.Options{Required: false, Help: "Set Organization ID"})
 	outputArg := subCommand.String("o", "output", &argparse.Options{Required: false, Help: "Thread File Output"})
-	rawFlag := subCommand.Flag("r", "raw", &argparse.Options{Required: false, Help: "Output raw Threads"})
+	prettyFlag := subCommand.Flag("p", "pretty", &argparse.Options{Required: false, Help: "Pretty print threads"})
 	timeLTEArg := subCommand.Float("d", "days", &argparse.Options{Required: false, Help: "Filter by LTE to days"})
 	timeGTArg := subCommand.Float("D", "Days", &argparse.Options{Required: false, Help: "Filter by GT days"})
 	lengthLTEArg := subCommand.Float("l", "length", &argparse.Options{Required: false, Help: "Filter by LTE to length"})
 	lengthGTArg := subCommand.Float("L", "Length", &argparse.Options{Required: false, Help: "Filter by GT length"})
 	contentContainsArg := subCommand.StringList("c", "content", &argparse.Options{Required: false, Help: "Filter by thread content contains"})
 	contentNotContainsArg := subCommand.StringList("C", "Content", &argparse.Options{Required: false, Help: "Filter by thread content not contains"})
-	metadataArg := subCommand.StringList("m", "meta", &argparse.Options{Required: false, Help: "Thread Data"})
+	metadataArg := subCommand.StringList("m", "meta", &argparse.Options{Required: false, Help: "Filter by thread metadata"})
 
 	return &DelCommand{
 		name,
@@ -62,7 +62,7 @@ func NewDelCommand(command *argparse.Command) *DelCommand {
 		sessionArg,
 		orgArg,
 		outputArg,
-		rawFlag,
+		prettyFlag,
 		timeLTEArg,
 		timeGTArg,
 		lengthLTEArg,
@@ -90,13 +90,12 @@ func (d *DelCommand) Run(key string) error {
 	fmt.Printf("✓\n")
 
 	fmt.Printf("Filtering thread ids...\t\t")
-	filteredThreadIDs, err := d.filterThreadsIds(&args, key, threadIDs);
+	filteredThreadIDs, err := d.filterThreadsIds(&args, key, threadIDs)
 	if err != nil {
 		fmt.Printf("X\n")
 		return err
 	}
 	fmt.Printf("✓\n")
-
 
 	fmt.Printf("Retrieving threads...\t\t")
 	rawThreads := openai.RetrieveThreadsMessages(key, filteredThreadIDs, *d.orgArg)
@@ -202,7 +201,7 @@ func (d *DelCommand) filterThreadsIds(args *[]argparse.Arg, key string, threadId
 	metadataParsed := (*args)[13].GetParsed()
 
 	if !metadataParsed {
-		return threadIds, nil;
+		return threadIds, nil
 	}
 
 	filtered := threadIds
@@ -214,7 +213,7 @@ func (d *DelCommand) filterThreadsIds(args *[]argparse.Arg, key string, threadId
 		metadata := make(map[string]string, len(*d.metadataArg))
 
 		for _, metadataStr := range *d.metadataArg {
-			metadataSplit := strings.Split(metadataStr, "=");
+			metadataSplit := strings.Split(metadataStr, "=")
 
 			if len(metadataSplit) < 2 {
 				errMsg := fmt.Sprintf("invalid metadata: '%s'. (should be '<key>=<value>')", metadataStr)
@@ -227,7 +226,6 @@ func (d *DelCommand) filterThreadsIds(args *[]argparse.Arg, key string, threadId
 
 			metadata[metadataKey] = metadataVal
 		}
-
 
 		filteredThreads := filter.MetadataEquals(threads, metadata)
 
@@ -300,10 +298,11 @@ func (d *DelCommand) filterThreads(args *[]argparse.Arg, rawThreads *[]openai.Me
 }
 
 func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, filteredThreads *[]openai.Messages) (*[]byte, error) {
-	rawParsed := (*args)[6].GetParsed()
+	prettyParsed := (*args)[6].GetParsed()
 
-	if rawParsed && *(d.rawFlag) {
-		threadOutput, err := io.ListToJSON(filteredThreads)
+	if prettyParsed && *(d.prettyFlag) {
+		parsedThreads := io.ParseThreads(threadIDs, filteredThreads)
+		threadOutput, err := io.ListToJSON(parsedThreads)
 
 		if err != nil {
 			return nil, err
@@ -313,8 +312,7 @@ func (d *DelCommand) getThreadsOutput(args *[]argparse.Arg, threadIDs []string, 
 
 	}
 
-	parsedThreads := io.ParseThreads(threadIDs, filteredThreads)
-	threadOutput, err := io.ListToJSON(parsedThreads)
+	threadOutput, err := io.ListToJSON(filteredThreads)
 
 	if err != nil {
 		return nil, err
